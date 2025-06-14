@@ -1,187 +1,50 @@
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { TrendingUp, TrendingDown, DollarSign, BarChart3, Wallet, Activity } from "lucide-react";
-import PortfolioOverview from "@/components/dashboard/PortfolioOverview";
+import { TrendingUp } from "lucide-react";
 import MarketOverview from "@/components/dashboard/MarketOverview";
-import PriceChart from "@/components/dashboard/PriceChart";
-import TradingPanel from "@/components/dashboard/TradingPanel";
-import NewsPanel from "@/components/dashboard/NewsPanel";
-import AISignalsPanel from "@/components/dashboard/AISignalsPanel";
-import PortfolioAnalytics from "@/components/dashboard/PortfolioAnalytics";
-import AlertsPanel from "@/components/dashboard/AlertsPanel";
-import MarketAnalysis from "@/components/dashboard/MarketAnalysis";
-import AdvancedTradingPanel from "@/components/dashboard/AdvancedTradingPanel";
+import PortfolioOverview from "@/components/dashboard/PortfolioOverview";
 import AIAgentManager from "@/components/dashboard/AIAgentManager";
-import { useMarketData, usePortfolioData } from "@/hooks/useMarketData";
-import { useAIAgents, useAISignals } from "@/hooks/useAIAgents";
+import AISignalsPanel from "@/components/dashboard/AISignalsPanel";
+import TradingPanel from "@/components/dashboard/TradingPanel";
+import PortfolioAnalytics from "@/components/dashboard/PortfolioAnalytics";
+import UserMenu from "@/components/UserMenu";
 
 const Index = () => {
-  const [portfolioValue, setPortfolioValue] = useState(45320.50);
-  const [portfolioChange, setPortfolioChange] = useState(2.34);
-  
-  const { data: marketData } = useMarketData();
-  const { data: portfolioData } = usePortfolioData();
-  const { agents } = useAIAgents();
-  const { signals } = useAISignals();
-
-  // Update portfolio value with real-time data
-  useEffect(() => {
-    if (portfolioData) {
-      setPortfolioValue(portfolioData.totalValue);
-      setPortfolioChange(portfolioData.totalChangePercent);
-    }
-  }, [portfolioData]);
-
-  const activeAgents = agents.filter(agent => agent.status === 'active');
-  const pendingSignals = signals.filter(signal => signal.status === 'pending');
-
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <header className="border-b bg-card">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold">CryptoTrader Pro</h1>
-              <Badge variant="secondary">AI-Powered</Badge>
-              <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                Live Data
-              </Badge>
+      <header className="bg-white dark:bg-gray-800 shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-3">
+              <TrendingUp className="h-8 w-8 text-blue-600" />
+              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+                CryptoTrader AI
+              </h1>
             </div>
-            <div className="flex items-center space-x-4">
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">Total Portfolio</p>
-                <p className="text-xl font-bold">${portfolioValue.toLocaleString()}</p>
-                <p className={`text-sm flex items-center ${portfolioChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {portfolioChange >= 0 ? <TrendingUp className="w-4 h-4 mr-1" /> : <TrendingDown className="w-4 h-4 mr-1" />}
-                  {portfolioChange >= 0 ? '+' : ''}{portfolioChange.toFixed(2)}%
-                </p>
-              </div>
-              <Button>Connect Wallet</Button>
-            </div>
+            <UserMenu />
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Enhanced Stats Cards */}
-          <div className="lg:col-span-4 grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Portfolio Value</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">${portfolioValue.toLocaleString()}</div>
-                <p className="text-xs text-muted-foreground">
-                  {portfolioChange >= 0 ? '+' : ''}{portfolioChange.toFixed(2)}% from yesterday
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">24h P&L</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  +${portfolioData?.dailyPnL.toFixed(2) || '1,250.32'}
-                </div>
-                <p className="text-xs text-muted-foreground">+2.84% gain</p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active AI Agents</CardTitle>
-                <BarChart3 className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {activeAgents.length}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {agents.length} total agents
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">AI Signals</CardTitle>
-                <Activity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{pendingSignals.length}</div>
-                <p className="text-xs text-muted-foreground">New signals today</p>
-              </CardContent>
-            </Card>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          <div className="lg:col-span-2">
+            <MarketOverview />
           </div>
-
-          {/* Enhanced Dashboard Tabs */}
-          <div className="lg:col-span-4">
-            <Tabs defaultValue="overview" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-8">
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="ai-agents">AI Agents</TabsTrigger>
-                <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
-                <TabsTrigger value="trading">Trading</TabsTrigger>
-                <TabsTrigger value="advanced">Advanced</TabsTrigger>
-                <TabsTrigger value="analytics">Analytics</TabsTrigger>
-                <TabsTrigger value="market">Market</TabsTrigger>
-                <TabsTrigger value="alerts">Alerts</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="overview" className="space-y-4">
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2 space-y-6">
-                    <PriceChart />
-                    <AISignalsPanel />
-                  </div>
-                  <div className="space-y-6">
-                    <PortfolioOverview />
-                    <MarketOverview />
-                  </div>
-                </div>
-              </TabsContent>
-
-              <TabsContent value="ai-agents">
-                <AIAgentManager />
-              </TabsContent>
-
-              <TabsContent value="portfolio">
-                <PortfolioOverview detailed={true} />
-              </TabsContent>
-
-              <TabsContent value="trading">
-                <TradingPanel />
-              </TabsContent>
-
-              <TabsContent value="advanced">
-                <AdvancedTradingPanel />
-              </TabsContent>
-
-              <TabsContent value="analytics">
-                <PortfolioAnalytics />
-              </TabsContent>
-
-              <TabsContent value="market">
-                <MarketAnalysis />
-              </TabsContent>
-
-              <TabsContent value="alerts">
-                <AlertsPanel />
-              </TabsContent>
-            </Tabs>
+          <div>
+            <PortfolioOverview />
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
+          <AIAgentManager />
+          <AISignalsPanel />
+        </div>
+
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+          <TradingPanel />
+          <PortfolioAnalytics />
         </div>
       </main>
     </div>
