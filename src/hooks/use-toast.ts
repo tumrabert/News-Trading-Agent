@@ -151,7 +151,7 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
-    },
+    } as ToasterToast,
   })
 
   return {
