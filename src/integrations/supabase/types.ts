@@ -9,7 +9,303 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      agent_performance: {
+        Row: {
+          agent_id: string
+          avg_trade_duration: unknown | null
+          created_at: string
+          id: string
+          max_drawdown: number
+          metadata: Json | null
+          period_end: string
+          period_start: string
+          sharpe_ratio: number | null
+          success_rate: number | null
+          total_pnl: number
+          total_trades: number
+          winning_trades: number
+        }
+        Insert: {
+          agent_id: string
+          avg_trade_duration?: unknown | null
+          created_at?: string
+          id?: string
+          max_drawdown?: number
+          metadata?: Json | null
+          period_end: string
+          period_start: string
+          sharpe_ratio?: number | null
+          success_rate?: number | null
+          total_pnl?: number
+          total_trades?: number
+          winning_trades?: number
+        }
+        Update: {
+          agent_id?: string
+          avg_trade_duration?: unknown | null
+          created_at?: string
+          id?: string
+          max_drawdown?: number
+          metadata?: Json | null
+          period_end?: string
+          period_start?: string
+          sharpe_ratio?: number | null
+          success_rate?: number | null
+          total_pnl?: number
+          total_trades?: number
+          winning_trades?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_performance_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_agents: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          name: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ai_signals: {
+        Row: {
+          agent_id: string
+          confidence: number
+          created_at: string
+          expires_at: string | null
+          fundamental_factors: Json | null
+          id: string
+          market_conditions: Json | null
+          reason: string
+          risk_level: string
+          signal_type: string
+          status: string
+          stop_loss: number | null
+          symbol: string
+          take_profit: number | null
+          target_price: number | null
+          technical_indicators: Json | null
+          time_horizon: string
+        }
+        Insert: {
+          agent_id: string
+          confidence: number
+          created_at?: string
+          expires_at?: string | null
+          fundamental_factors?: Json | null
+          id?: string
+          market_conditions?: Json | null
+          reason: string
+          risk_level: string
+          signal_type: string
+          status?: string
+          stop_loss?: number | null
+          symbol: string
+          take_profit?: number | null
+          target_price?: number | null
+          technical_indicators?: Json | null
+          time_horizon: string
+        }
+        Update: {
+          agent_id?: string
+          confidence?: number
+          created_at?: string
+          expires_at?: string | null
+          fundamental_factors?: Json | null
+          id?: string
+          market_conditions?: Json | null
+          reason?: string
+          risk_level?: string
+          signal_type?: string
+          status?: string
+          stop_loss?: number | null
+          symbol?: string
+          take_profit?: number | null
+          target_price?: number | null
+          technical_indicators?: Json | null
+          time_horizon?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_signals_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      market_news: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          impact_score: number | null
+          published_at: string
+          sentiment: string | null
+          source: string
+          symbols_mentioned: string[] | null
+          title: string
+          url: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          impact_score?: number | null
+          published_at: string
+          sentiment?: string | null
+          source: string
+          symbols_mentioned?: string[] | null
+          title: string
+          url?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          impact_score?: number | null
+          published_at?: string
+          sentiment?: string | null
+          source?: string
+          symbols_mentioned?: string[] | null
+          title?: string
+          url?: string | null
+        }
+        Relationships: []
+      }
+      risk_events: {
+        Row: {
+          action_taken: string | null
+          agent_id: string
+          created_at: string
+          description: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          severity: string
+        }
+        Insert: {
+          action_taken?: string | null
+          agent_id: string
+          created_at?: string
+          description: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          severity: string
+        }
+        Update: {
+          action_taken?: string | null
+          agent_id?: string
+          created_at?: string
+          description?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          severity?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "risk_events_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      trade_executions: {
+        Row: {
+          agent_id: string
+          amount: number
+          executed_at: string
+          execution_type: string
+          fees: number | null
+          id: string
+          metadata: Json | null
+          price: number
+          side: string
+          signal_id: string | null
+          status: string
+          symbol: string
+          total_value: number
+        }
+        Insert: {
+          agent_id: string
+          amount: number
+          executed_at?: string
+          execution_type: string
+          fees?: number | null
+          id?: string
+          metadata?: Json | null
+          price: number
+          side: string
+          signal_id?: string | null
+          status: string
+          symbol: string
+          total_value: number
+        }
+        Update: {
+          agent_id?: string
+          amount?: number
+          executed_at?: string
+          execution_type?: string
+          fees?: number | null
+          id?: string
+          metadata?: Json | null
+          price?: number
+          side?: string
+          signal_id?: string | null
+          status?: string
+          symbol?: string
+          total_value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trade_executions_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "ai_agents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "trade_executions_signal_id_fkey"
+            columns: ["signal_id"]
+            isOneToOne: false
+            referencedRelation: "ai_signals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

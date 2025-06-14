@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,7 +15,9 @@ import PortfolioAnalytics from "@/components/dashboard/PortfolioAnalytics";
 import AlertsPanel from "@/components/dashboard/AlertsPanel";
 import MarketAnalysis from "@/components/dashboard/MarketAnalysis";
 import AdvancedTradingPanel from "@/components/dashboard/AdvancedTradingPanel";
+import AIAgentManager from "@/components/dashboard/AIAgentManager";
 import { useMarketData, usePortfolioData } from "@/hooks/useMarketData";
+import { useAIAgents, useAISignals } from "@/hooks/useAIAgents";
 
 const Index = () => {
   const [portfolioValue, setPortfolioValue] = useState(45320.50);
@@ -22,6 +25,8 @@ const Index = () => {
   
   const { data: marketData } = useMarketData();
   const { data: portfolioData } = usePortfolioData();
+  const { agents } = useAIAgents();
+  const { signals } = useAISignals();
 
   // Update portfolio value with real-time data
   useEffect(() => {
@@ -30,6 +35,9 @@ const Index = () => {
       setPortfolioChange(portfolioData.totalChangePercent);
     }
   }, [portfolioData]);
+
+  const activeAgents = agents.filter(agent => agent.status === 'active');
+  const pendingSignals = signals.filter(signal => signal.status === 'pending');
 
   return (
     <div className="min-h-screen bg-background">
@@ -93,15 +101,15 @@ const Index = () => {
 
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Positions</CardTitle>
+                <CardTitle className="text-sm font-medium">Active AI Agents</CardTitle>
                 <BarChart3 className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {portfolioData?.holdings.length || 4}
+                  {activeAgents.length}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {portfolioData?.holdings.filter(h => h.change > 0).length || 3} profitable positions
+                  {agents.length} total agents
                 </p>
               </CardContent>
             </Card>
@@ -112,8 +120,8 @@ const Index = () => {
                 <Activity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">5</div>
-                <p className="text-xs text-muted-foreground">New buy signals</p>
+                <div className="text-2xl font-bold">{pendingSignals.length}</div>
+                <p className="text-xs text-muted-foreground">New signals today</p>
               </CardContent>
             </Card>
           </div>
@@ -121,8 +129,9 @@ const Index = () => {
           {/* Enhanced Dashboard Tabs */}
           <div className="lg:col-span-4">
             <Tabs defaultValue="overview" className="space-y-4">
-              <TabsList className="grid w-full grid-cols-7">
+              <TabsList className="grid w-full grid-cols-8">
                 <TabsTrigger value="overview">Overview</TabsTrigger>
+                <TabsTrigger value="ai-agents">AI Agents</TabsTrigger>
                 <TabsTrigger value="portfolio">Portfolio</TabsTrigger>
                 <TabsTrigger value="trading">Trading</TabsTrigger>
                 <TabsTrigger value="advanced">Advanced</TabsTrigger>
@@ -142,6 +151,10 @@ const Index = () => {
                     <MarketOverview />
                   </div>
                 </div>
+              </TabsContent>
+
+              <TabsContent value="ai-agents">
+                <AIAgentManager />
               </TabsContent>
 
               <TabsContent value="portfolio">
