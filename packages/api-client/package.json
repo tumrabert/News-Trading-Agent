@@ -1,0 +1,26 @@
+{
+  "name": "@workspace/api-client",
+  "version": "1.0.0",
+  "description": "API client for communicating with the AI agent",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "dependencies": {
+    "@workspace/shared-types": "workspace:*",
+    "axios": "^1.10.0",
+    "socket.io-client": "^4.7.4"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

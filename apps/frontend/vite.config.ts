@@ -8,7 +8,12 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+      '@workspace/shared-types': path.resolve(__dirname, '../../packages/shared-types/dist'),
+      '@workspace/api-client': path.resolve(__dirname, '../../packages/api-client/dist'),
     },
+  },
+  optimizeDeps: {
+    include: ['@workspace/shared-types', '@workspace/api-client'],
   },
   server: {
     port: 3000,
