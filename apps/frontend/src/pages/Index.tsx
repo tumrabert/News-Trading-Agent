@@ -1,11 +1,14 @@
 
-import { TrendingUp } from "lucide-react";
+import { TrendingUp, TestTube } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import MarketOverview from "@/components/dashboard/MarketOverview";
 import PortfolioOverview from "@/components/dashboard/PortfolioOverview";
 import AIAgentManager from "@/components/dashboard/AIAgentManager";
 import AISignalsPanel from "@/components/dashboard/AISignalsPanel";
 import TradingPanel from "@/components/dashboard/TradingPanel";
 import PortfolioAnalytics from "@/components/dashboard/PortfolioAnalytics";
+import TestRunner from "@/components/TestRunner";
 import UserMenu from "@/components/UserMenu";
 
 const Index = () => {
@@ -21,7 +24,21 @@ const Index = () => {
                 CryptoTrader AI
               </h1>
             </div>
-            <UserMenu />
+            <div className="flex items-center space-x-4">
+              {/* Test Runner Dialog */}
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <TestTube className="w-4 h-4" />
+                    Run Tests
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-5xl max-h-[80vh] overflow-y-auto">
+                  <TestRunner />
+                </DialogContent>
+              </Dialog>
+              <UserMenu />
+            </div>
           </div>
         </div>
       </header>
