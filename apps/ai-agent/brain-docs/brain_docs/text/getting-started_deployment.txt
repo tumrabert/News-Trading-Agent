@@ -1,0 +1,276 @@
+URL: https://brain.iqai.com/getting-started/deployment
+==================================================
+
+Deployment
+This guide covers deploying your Brain Framework agent on any long running Node.js server environment, including database setup considerations.
+Caution
+Currently some plugins don’t support serverless deployments. but we are
+planning to add support for serverless deployments in the future.
+Database SelectionSection titled “Database Selection”
+Choose the appropriate database adapter based on your deployment needs:
+PostgreSQL
+@elizaos/adapter-postgres
+Recommended for production deployments
+Scalable and robust
+SQLite
+@elizaos/adapter-sqlite
+Great for development and small deployments
+Self-contained file database
+Supabase
+@elizaos/adapter-supabase
+Cloud-native solution
+Managed database service
+Server RequirementsSection titled “Server Requirements”
+Node.js 22 or higher
+pnpm 9.x (recommended)
+Database system based on chosen adapter
+Persistent storage for database files (if using SQLite)
+Production SetupSection titled “Production Setup”
+Install required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/adapter-postgres
+Terminal windowpnpm add github:elizaos-plugins/adapter-postgres
+Terminal windowyarn add github:elizaos-plugins/adapter-postgres
+Create a PM2 ecosystem file (ecosystem.config.js):
+module.exports = {
+apps: [
+{
+name: "brain-agent",
+script: "./dist/index.js",
+instances: 1,
+autorestart: true,
+watch: false,
+max_memory_restart: "1G",
+env: {
+NODE_ENV: "production",
+DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+},
+},
+],};
+Configure your database adapter:
+import { AgentBuilder } from "@iqai/agent";import { PostgresDatabaseAdapter } from "@elizaos/adapter-postgres";
+const agent = new AgentBuilder()
+.withDatabase(
+new PostgresDatabaseAdapter({
+connectionString: process.env.DATABASE_URL,
+})
+)
+.build();
+Build and start:
+Terminal window
+pnpm build
+pm2 start ecosystem.config.js
+Database-Specific ConsiderationsSection titled “Database-Specific Considerations”
+PostgreSQL
+SQLite
+Supabase
+Terminal window# Required environment variablesDATABASE_URL=postgresql://user:pass@localhost:5432/db
+Terminal window# Set file location DATABASE_PATH=./data/agent.db
+Terminal window# Required environment variables SUPABASE_URL=your-project-urlSUPABASE_KEY=your-api-key
+Digital Ocean Deployment GuideSection titled “Digital Ocean Deployment Guide”
+Create a dropletSection titled “Create a droplet”
+Here is a link to Digital Ocean guide to create a droplet: Setup a DO Droplet
+Initial Server SetupSection titled “Initial Server Setup”
+Connect to your droplet:
+Terminal windowssh root@your_droplet_ip
+Update the system:
+Terminal windowsudo apt update && sudo apt upgrade -y
+Installing and Configuring NGINXSection titled “Installing and Configuring NGINX”
+Install NGINX
+Terminal windowsudo apt install nginx -y
+Start and Enable NGINX
+Terminal windowsudo systemctl start nginxsudo systemctl enable nginx
+Verify the Installation
+Terminal windowsudo systemctl status nginx
+You can also open your web browser and navigate to:
+Terminal windowhttp://your_droplet_ip
+Configure Firewall for NGINX
+Terminal windowsudo apt install ufw -ysudo ufw allow 'Nginx Full'
+Test and Reload NGINX Configuration
+Terminal windowsudo nginx -tsudo systemctl reload nginx
+Network ConfigurationSection titled “Network Configuration”
+Install Net Tools
+Terminal windowsudo apt install net-tools -ynetstat --version
+Configure Firewall for Your Application
+Terminal windowsudo ufw allow ssh
+# or sudo ufw allow 22/tcpsudo ufw allow 3000/tcp
+# Adjust port as needed for your applicationsudo ufw reloadsudo ufw enablesudo ufw status
+Setting Up GitSection titled “Setting Up Git”
+Install Git
+Terminal windowsudo apt install git -ygit --version
+Configure Git (optional depending on use case)
+Terminal windowgit config --global user.name "Your Name"git config --global user.email "[email protected]"
+Node.js Environment SetupSection titled “Node.js Environment Setup”
+Install Node.js
+Terminal windowcurl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -sudo apt install -y nodejs
+Verify Node.js Installation
+Terminal windownode -vnpm -v
+Install PNPM
+Terminal windownpm install -g pnpmpnpm -v
+Clone Your RepositorySection titled “Clone Your Repository”
+Terminal windowsudo mkdir -p /home/ubuntu/cd /home/ubuntugit clone https://github.com/username/repository.gitcd your-projectpnpm install
+Deployment MethodsSection titled “Deployment Methods”
+You can use the following methods to deploy your agent: PM2, Docker, and Docker Compose.
+PM2
+Docker
+Docker Compose
+PM2 Process ManagerSection titled “PM2 Process Manager”Install PM2Terminal windowsudo npm install -g pm2Set Up PM2 to Start on Boot (Optional)Terminal windowpm2 startup systemdpm2 saveStart Your Application with PM2Terminal windowpm2 start "pnpm dev" --name your-app-nameBasic PM2 CommandsTerminal window# Restart applicationpm2 restart your-app-name
+# Stop applicationpm2 stop your-app-name
+# Delete application from PM2pm2 delete your-app-name
+# View running applicationspm2 list
+# Monitor applicationpm2 monit
+Docker Deployment (Direct)Section titled “Docker Deployment (Direct)”Install DockerTerminal windowsudo apt install docker.io -ysudo systemctl start dockersudo systemctl enable dockerDeploy with DockerTerminal window# Build your Docker imagedocker build -t image_name .
+# Run your containerdocker run -d --name container_name -p host_port:container_port image_name
+# Stop and remove containerdocker stop container_namedocker rm container_nameSample SetupFROM node:23-slim
+WORKDIR /app
+# Install pnpmRUN npm install -g pnpm
+# Copy package files and install dependenciesCOPY package.json pnpm-lock.yaml* ./RUN pnpm install
+# Copy project filesCOPY src/ ./src/COPY tsconfig.json ./COPY .env ./
+# Create data directory for SQLiteRUN mkdir -p data
+# Run the applicationCMD ["pnpm", "dev"]Build and run:Terminal windowdocker build -t brain-agent .docker run -d \
+-p 3000:3000 \
+--name brain-agent \
+-e DATABASE_URL=postgresql://user:pass@host:5432/db \
+brain-agentCommon commands:Terminal window# Stop containerdocker stop brain-agent
+# Start containerdocker start brain-agent
+# View logsdocker logs -f brain-agent
+Docker Compose DeploymentSection titled “Docker Compose Deployment”Install Docker ComposeTerminal windowsudo apt install docker-compose -yCreate docker-compose.yml:version: '3.8'services:
+app:
+build: .
+ports:
+- "3000:3000"
+environment:
+DATABASE_URL: postgresql://user:pass@db:5432/db
+depends_on:
+- db
+db:
+image: postgres:15
+environment:
+POSTGRES_USER: user
+POSTGRES_PASSWORD: pass
+POSTGRES_DB: db
+volumes:
+- postgres_data:/var/lib/postgresql/data
+volumes:
+postgres_data:Deploy with Docker ComposeTerminal window# Navigate to your project directorycd /path/to/your/project
+# Create or modify docker-compose.yml file# Run your containersdocker-compose up --build -d
+# Stop and remove containersdocker-compose downManagement commands:Terminal window# View logsdocker-compose logs -f
+SSL Configuration (Optional)Section titled “SSL Configuration (Optional)”
+Install Certbot for Let’s Encrypt SSL
+Terminal windowsudo apt install certbot python3-certbot-nginx -y
+Obtain SSL Certificate
+Terminal windowsudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+TroubleshootingSection titled “Troubleshooting”
+Check NGINX Logs
+Terminal windowsudo tail -f /var/log/nginx/access.logsudo tail -f /var/log/nginx/error.log
+Check System Resources
+Terminal windowhtop
+# Install with: sudo apt install htop
+Setting up Github CI/CDSection titled “Setting up Github CI/CD”
+Create a folder .github/workflows in your project root
+Then a file ci.yml in the folder .github/workflows created in your project root
+Copy and paste the following code in the ci.yml, you can edit further to your specification
+Terminal windowname: Brain Agent CI/CD
+on:
+push:
+branches: [main]
+jobs:
+lint-and-test:
+runs-on: ubuntu-latest
+steps:
+- uses: actions/checkout@v4
+- name: Setup pnpm
+uses: pnpm/action-setup@v2
+with:
+version: 10
+- name: Setup Node.js
+uses: actions/setup-node@v4
+with:
+node-version: "22"
+cache: "pnpm"
+- name: Install dependencies
+run: pnpm install
+- name: Lint
+run: pnpm lint
+build:
+runs-on: ubuntu-latest
+steps:
+- uses: actions/checkout@v4
+- name: Setup Node.js
+uses: actions/setup-node@v4
+with:
+node-version: "22"
+cache: "pnpm"
+- name: Setup pnpm
+uses: pnpm/action-setup@v2
+with:
+version: 10
+- name: Install dependencies
+run: pnpm install
+- name: Build
+run: pnpm build
+env:
+LIST_YOUR_ENV_KEYS: ${{ secrets.GET_THE_SET_VALUES_IN_GITHUB_SECRET }}
+deploy:
+needs: build
+runs-on: ubuntu-latest
+environment: production
+steps:
+- name: Checkout code
+uses: actions/checkout@v4
+- name: Setup Node.js
+uses: actions/setup-node@v4
+with:
+node-version: "22"
+- name: Setup pnpm
+uses: pnpm/action-setup@v2
+with:
+version: 10
+- name: Install dependencies
+run: pnpm install
+- name: Get changed files
+id: changed-files
+uses: tj-actions/changed-files@v41
+with:
+files: |
+apps/**
+- name: Deploy to Server
+if: steps.changed-files.outputs.any_changed == 'true'
+uses: appleboy/[email protected]
+with:
+host: ${{ secrets.DIGITALOCEAN_HOST }}
+username: ${{ secrets.DIGITALOCEAN_USER }}
+key: ${{ secrets.DIGITALOCEAN_PRIVATE_KEY }}
+port: ${{ secrets.DIGITALOCEAN_PORT }}
+script: |
+cd /home/ubuntu/your-project/apps
+git pull origin main
+cat > .env << EOF
+LIST_YOUR_ENV_KEYS: ${{ secrets.GET_THE_SET_VALUES_IN_GITHUB_SECRET }}
+EOF
+chmod 600 .env
+pnpm install
+# pm2 restart your-agent-name or docker-compose down && docker-compose up -d --build
+Deploying Your Agent to Google Cloud RunSection titled “Deploying Your Agent to Google Cloud Run”
+You can deploy your agent to Google Cloud Run using either the Web UI or Command Line.
+Web UI
+Command Line
+Google Cloud Console DeploymentSection titled “Google Cloud Console Deployment”PrerequisitesGoogle Cloud Account (with billing enabled)Project in GCP (or create new one)Agent Code (Dockerized or supported language)Note: If not containerized, Cloud Run can build from source (Python/Node.js/Go)Access Cloud RunGo to Google Cloud ConsoleSelect your projectNavigation Menu ☰ > Serverless > Cloud RunCreate ServiceClick ”+ CREATE SERVICE”Choose deployment method: Existing container image (if using Docker)Source code (if you want Cloud Run to build the container from your source code ie GitHub/Cloud Source)Configure ServiceName: my-agentRegion: us-central1 (or closest)Authentication: Allow unauthenticated if publicContainer: Image URL or source connectionAdvanced (optional): CPU/Memory, Auto-scalingRemember to set theseSet port to be set to 3000Add direct client interface to be used to allow health checksMemory & CPU: Adjust if needed (recommended: 2 CPU, 1-2GB RAM)Environment variables: Define environment variables your agent needs before deploymentScaling: Set minimum and maximum instances (recommended: min. 1)Deploy & TestClick “CREATE” (1-2 minutes)Access Service URL (https://my-agent-xyz.a.run.app)Test: Terminal windowcurl https://my-agent-xyz.a.run.app
+gcloud CLI DeploymentSection titled “gcloud CLI Deployment”PrerequisitesInstall gcloud CLIAuthenticate: Terminal windowgcloud auth logingcloud config set project PROJECT_IDDeploy from ContainerTerminal windowgcloud run deploy my-agent \
+--image=gcr.io/PROJECT_ID/agent-image:latest \
+--platform=managed \
+--region=us-central1 \
+--allow-unauthenticatedDeploy from SourceTerminal windowgcloud run deploy my-agent \
+--source . \
+--platform=managed \
+--region=us-central1Test DeploymentTerminal windowSERVICE_URL=$(gcloud run services describe my-agent \
+--region=us-central1 \
+--format="value(status.url)")
+curl $SERVICE_URLManage ServiceTerminal window# Update deploymentgcloud run deploy my-agent --image=NEW_IMAGE
+# View logsgcloud logging read "resource.type=cloud_run_revision"
+# Delete servicegcloud run services delete my-agent
+Post-DeploymentSection titled “Post-Deployment”
+MonitoringLogs: Cloud Console > Logging > Cloud RunMetrics: Monitoring > Cloud Run DashboardNext StepsSet up CI/CD with Cloud BuildConfigure custom domainsAdd event triggers (Pub/Sub, Storage)
+For more complex configurations, refer to the: Google Cloud Run documentation

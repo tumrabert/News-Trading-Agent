@@ -1,0 +1,38 @@
+{
+  "name": "@workspace/ai-agent",
+  "version": "1.0.0",
+  "description": "CryptoSentinel AI trading agent using Brain Framework",
+  "license": "ISC",
+  "author": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.3",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@elizaos/adapter-sqlite": "github:elizaos-plugins/adapter-sqlite",
+    "@elizaos/client-direct": "github:elizaos-plugins/client-direct",
+    "@iqai/agent": "^0.2.1",
+    "@iqai/plugin-atp": "^0.4.3",
+    "@iqai/plugin-heartbeat": "^0.3.1",
+    "@iqai/plugin-sequencer": "^0.2.2",
+    "@workspace/shared-types": "workspace:*",
+    "@types/node-cron": "^3.0.11",
+    "axios": "^1.10.0",
+    "better-sqlite3": "^11.10.0",
+    "ccxt": "^4.4.89",
+    "cheerio": "^1.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.18.2",
+    "node-cron": "^4.1.0",
+    "rss-parser": "^3.13.0",
+    "ws": "^8.18.2"
+  }
+}

@@ -1,0 +1,74 @@
+URL: https://brain.iqai.com/plugins/atp
+==================================================
+
+ATP Plugin
+The ATP Plugin enables your agent to interact with IQ’s Agent Tokenization Platform. It provides functionality for:
+Buying, selling, and managing AI agent tokens using IQ as the base currency
+Viewing agent performance metrics and token statistics
+Managing token holdings and checking position values
+Viewing and adding agent logs for activity tracking
+InstallationSection titled “Installation”
+Install the required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/agent @iqai/plugin-atp
+Terminal windowpnpm add @iqai/agent @iqai/plugin-atp
+Terminal windowyarn add @iqai/agent @iqai/plugin-atp
+Create a .env file with the required configuration:
+Terminal windowWALLET_PRIVATE_KEY=your-wallet-private-keyAPI_KEY=your-api-key # Optional - required only for adding logs
+Basic SetupSection titled “Basic Setup”
+Here’s a complete example of setting up an agent with the ATP plugin:
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import { createAtpPlugin } from "@iqai/plugin-atp";
+async function main() {
+// Initialize ATP plugin const atpPlugin = await createAtpPlugin({
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+apiKey: process.env.ATP_API_KEY, // Optional - required only for adding logs
+});
+// Create agent with plugin
+const agent = new AgentBuilder()
+.withClient(DirectClient)
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withPlugin(bootstrapPlugin)
+.withPlugin(atpPlugin)
+.build();
+await agent.start();}
+main().catch(console.error);
+Available OperationsSection titled “Available Operations”
+Agent Statistics: View performance metrics and token statistics
+Portfolio Management: Monitor holdings and position values
+Trading Operations: Buy/sell agent tokens using IQ
+Agents list: View a list of available agents
+Agent Logs: View and add activity logs for agents
+Usage ExamplesSection titled “Usage Examples”
+OperationExample QueryCheck StatsShow me stats for agent 0x1234...5678View PortfolioShow my ATP holdingsBuy TokensBuy 1000 IQ worth of agent 0x1234...5678Sell TokensSell 50 tokens of agent 0x1234...5678List AgentsShow me top agents on atpView LogsShow logs for agent 0x1234...5678Add LogAdd log for agent 0x1234...5678: Weekly yield distribution complete
+Configuration OptionsSection titled “Configuration Options”
+The ATP plugin accepts the following configuration parameters:
+interface ATPPluginConfig {
+walletPrivateKey: string;
+// Private key for transactions
+apiKey?: string;
+// API key for adding logs (optional)}
+Error HandlingSection titled “Error Handling”
+Always implement proper error handling when using the plugin:
+try {
+const atpPlugin = await createAtpPlugin({
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+apiKey: process.env.API_KEY,
+});} catch (error) {
+console.error('Failed to initialize ATP plugin:', error);}
+Best PracticesSection titled “Best Practices”
+Token Validation: Verify agent addresses before transactions
+Amount Verification: Double-check token amounts and IQ values
+Transaction Monitoring: Track transaction status and confirmations
+Balance Management: Ensure sufficient IQ balance for purchases
+Log Management: Keep logs concise and informative for better tracking
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Invalid Agent Address: Ensure you’re using the correct agent token contract address
+Insufficient IQ Balance: Verify you have enough IQ tokens for purchases
+Transaction Failures: Check transaction parameters and network status
+Token Approval: Ensure proper token approvals before selling
+Missing API Key: An API key is required for adding logs (but not for viewing them)

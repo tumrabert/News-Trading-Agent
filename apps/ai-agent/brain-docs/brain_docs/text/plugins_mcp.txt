@@ -1,0 +1,85 @@
+URL: https://brain.iqai.com/plugins/mcp
+==================================================
+
+MCP Plugin
+The MCP Plugin acts as a mediator between the Brain framework and an MCP server. It connects to an MCP server—either locally via stdio or remotely via SSE—retrieves available tools and converts them into actions that the Brain Framework can execute. The actions are generated dynamically based on the MCP server’s capabilities.
+There are two ways to configure the plugin:
+Stdio Mode: For local MCP servers using process-based communication.
+SSE Mode: For remote MCP servers using Server-Sent Events.
+InstallationSection titled “Installation”
+Install the plugin:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/plugin-mcp
+Terminal windowpnpm add @iqai/plugin-mcp
+Terminal windowyarn add @iqai/plugin-mcp
+ConfigurationSection titled “Configuration”
+Configure the plugin with the following parameters:
+Param NameDescriptionRequirednameName of the MCP pluginYesdescriptionDescription of the pluginYestransportTransport configuration object (see below)YeshandleResponseCustom handler for processing tool call resultsNodisableToolChainingDisable automatic tool chaining behaviorNotoolChainingTemplateCustom template for tool chaining promptNo
+Transport ConfigurationSection titled “Transport Configuration”
+Configure the plugin for either stdio or sse modes.
+Stdio ModeSection titled “Stdio Mode”
+Use stdio mode when you want to run a local MCP server as a separate process.
+Param NameDescriptionmodeMust be set to "stdio"commandCommand to run the local MCP server processargsArguments for the local MCP server process (string list)
+SSE ModeSection titled “SSE Mode”
+Use sse mode to connect to a remote MCP server via Server-Sent Events.
+Param NameDescriptionmodeMust be set to "sse"serverUrlThe base URL of the remote MCP serverheadersHeaders to include (if any) in the request to the remote server
+UsageSection titled “Usage”
+Import and initialize the plugin using the createMcpPlugin method.
+For a Local MCP Server (Stdio Mode)Section titled “For a Local MCP Server (Stdio Mode)”
+import { createMcpPlugin } from "@iqai/plugin-mcp";
+// Initialize the plugin with stdio configurationconst pluginFs = await createMcpPlugin({
+name: "file-system",
+description: "File system MCP server",
+transport: {
+mode: "stdio",
+command: "npx",
+args: [
+"-y",
+"@modelcontextprotocol/server-filesystem",
+"/home/user/",
+"/home/user/Desktop",
+],
+}});
+For a Remote MCP Server (SSE Mode)Section titled “For a Remote MCP Server (SSE Mode)”
+import { createMcpPlugin } from "@iqai/plugin-mcp";
+// Initialize the plugin with sse configurationconst plugin = await createMcpPlugin({
+name: "remote-mcp-tools",
+description: "Remote MCP server tools",
+transport: {
+mode: "sse",
+serverUrl: "YOUR_SERVER_URL",
+headers: {}
+}});
+Once initialized, the plugin dynamically generates actions based on the MCP server’s available tools, prompts, and resources.
+Automatic Tool ChainingSection titled “Automatic Tool Chaining”
+The plugin features automatic tool chaining, which enables more powerful interactions between tools:
+When a tool returns a file path, the system can automatically use filesystem tools if available to read the content
+Structured data outputs from one tool can serve as inputs to another tool
+Complex workflows can be automated without requiring explicit tool invocation for each step
+For example, if a tool generates a code file and returns its path, the system will automatically detect this and can:
+Read the file content using filesystem tools if available by a plugin or via filesystem mcp server.
+Present the code with proper formatting
+Suggest further actions based on the file type
+Error HandlingSection titled “Error Handling”
+The plugin manages various error scenarios, such as:
+Connection failures to the MCP server.
+Invalid tool, prompt, or resource requests.
+Network errors or unexpected server responses.
+Errors are logged and relayed as informative messages to the Brain UI.
+Security ConsiderationsSection titled “Security Considerations”
+For SSE mode:
+Ensure you are connecting to a trusted MCP server.
+Use HTTPS endpoints for secure communication.
+Validate all configuration parameters to avoid misconfigurations.
+Learn More About MCPSection titled “Learn More About MCP”
+For more details on the Model Context Protocol and available server implementations, check out these resources:
+MCP Servers on GitHub:
+Explore a collection of MCP server implementations at
+github.com/modelcontextprotocol/servers
+.
+Introduction to MCP:
+Learn about the core concepts and benefits of MCP at
+modelcontextprotocol.io/introduction
+.

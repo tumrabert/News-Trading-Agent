@@ -1,0 +1,63 @@
+URL: https://brain.iqai.com/plugins/bamm
+==================================================
+
+BAMM Plugin
+The BAMM Plugin enables you to interact with BAMM, a decentralized platform for borrowing, lending, and managing liquidity positions in Fraxswap-style pools.
+InstallationSection titled “Installation”
+Install the required package:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/plugin-bamm
+Terminal windowpnpm add @iqai/plugin-bamm
+Terminal windowyarn add @iqai/plugin-bamm
+Create a .env file with the following environment variable:
+Terminal windowWALLET_PRIVATE_KEY=your-wallet-private-key
+Basic SetupSection titled “Basic Setup”
+Here’s how to initialize and use the BAMM plugin:
+import { createBAMMPlugin } from '@iqai/plugin-bamm';import { fraxtal } from 'viem/chains';
+async function main() {
+// Initialize BAMM plugin
+const bammPlugin = await createBAMMPlugin({
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+chain: fraxtal,
+});
+// Now the plugin is ready to use}
+Available OperationsSection titled “Available Operations”
+The BAMM plugin allows the following operations:
+BAMM_BORROW: Borrow assets from BAMM pools using collateral.
+BAMM_LEND: Lend assets to BAMM pools.
+BAMM_ADD_COLLATERAL: Add collateral to your BAMM position.
+BAMM_REMOVE_COLLATERAL: Remove collateral from your BAMM position.
+BAMM_REPAY: Repay borrowed assets to a BAMM pool.
+BAMM_WITHDRAW: Withdraw LP tokens by redeeming BAMM tokens.
+BAMM_GET_POSITIONS: View current positions in BAMM pools.
+BAMM_GET_POOL_STATS: Get statistics for all BAMM pools.
+Usage ExamplesSection titled “Usage Examples”
+Note
+Either token address or token symbol can be provided in the query. Only the bamm address is must
+OperationExample QueryBorrow tokensborrow 10k of CABU from this 0xC5B225cF058915BF28D7d9DFA3043BD53C63Ea84 bammLend LP tokenslend 10k lp tokens to 0xC5B225cF058915BF28D7d9DFA3043BD53C63Ea84 bammAdd collateraladd 100k collateral of 0xCc3023635dF54FC0e43F47bc4BeB90c3d1fbDa9f to this 0xC5B225cF058915BF28D7d9DFA3043BD53C63Ea84 bammRemove collateralremove 10k collateral of IQT from this 0xC5B225cF058915BF28D7d9DFA3043BD53C63Ea84 bammRepay borrowed tokensrepay 10k of CABU to this 0xC5B225cF058915BF28D7d9DFA3043BD53C63Ea84 bammWithdraw LP tokenswithdraw 10k bamm tokens from this 0xC5B225cF058915BF28D7d9DFA3043BD53C63Ea84 bammGet your positionsMy Bamm postionsGet available bamm poolsAll bamm pools
+Configuration OptionsSection titled “Configuration Options”
+The plugin requires the following configuration options:
+interface BAMMActionParams {
+chain: Chain;
+// Blockchain network configuration
+walletPrivateKey: string;
+// Private key for transactions}
+Error HandlingSection titled “Error Handling”
+Handle errors gracefully by wrapping the plugin actions in try/catch blocks:
+try {
+const bammPlugin = await createBAMMPlugin({
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+chain: fraxtal,
+});} catch (error) {
+console.error('Failed to initialize BAMM plugin:', error);}
+Best PracticesSection titled “Best Practices”
+Security: Never expose your wallet private key.
+Amount Verification: Always verify the amounts and token addresses before interacting with the plugin.
+Rate Limits: Be mindful of rate limits and avoid excessive transactions in a short period.
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Insufficient Balance: Ensure that your wallet has enough balance to perform the requested operations.
+Transaction Failure: Confirm that the pool address is valid and your collateral is sufficient.
+Network Issues: Ensure you have a stable connection to the blockchain network.
+Token Approval: Check if the required tokens are approved for lending or borrowing.

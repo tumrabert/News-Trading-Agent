@@ -1,0 +1,40 @@
+URL: https://brain.iqai.com/clients/discord
+==================================================
+
+Discord Client
+The Discord Client enables your agent to interact with Discord servers, supporting message handling, voice interactions, and slash commands. Visit Elizaos
+Discord client docs
+for more details.
+InstallationSection titled “Installation”
+Install required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/client-discord @elizaos/[email protected]
+Terminal windowpnpm add github:elizaos-plugins/client-discord @elizaos/[email protected]
+Terminal windowyarn add github:elizaos-plugins/client-discord @elizaos/[email protected]
+Configure environment variables:
+Terminal window# Required Discord credentialsDISCORD_API_TOKEN=your_bot_token
+Basic SetupSection titled “Basic Setup”
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import DiscordClient from "@elizaos/client-discord";import SqliteAdapter from "@elizaos/adapter-sqlite";
+async function main() {
+const agent = new AgentBuilder()
+.withDatabase(SqliteAdapter)
+.withClient(DiscordClient)
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withCharacter({
+name: "DiscordBot",
+bio: "A helpful Discord assistant",
+username: "brain-bot"
+})
+.build();
+await agent.start();}
+main().catch(console.error);
+Best PracticesSection titled “Best Practices”
+Always initialize with a database adapter
+Set appropriate character configuration for Discord context
+Handle client startup errors appropriately
+Implement proper Discord permission handling

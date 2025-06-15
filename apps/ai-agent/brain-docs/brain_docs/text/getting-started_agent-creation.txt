@@ -1,0 +1,157 @@
+URL: https://brain.iqai.com/getting-started/agent-creation
+==================================================
+
+Agent Creation
+Brain Framework uses a builder pattern for creating agents, allowing flexible configuration of databases, clients, model providers, plugins and character settings.
+Before diving into individual configuration options, here’s how all the pieces come together using Brain Framework’s builder pattern:
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import SqliteAdapter from "@elizaos/adapter-sqlite";import DirectClient from "@elizaos/client-direct";
+async function main() {
+const agent = new AgentBuilder()
+.withDatabase(SqliteAdapter)
+.withClient(DirectClient)
+.withModelProvider(ModelProviderName.OPENAI, process.env.OPENAI_API_KEY)
+.withCharacter({
+name: "MyBot",
+bio: "A helpful assistant",
+username: "mybot",
+messageExamples: ["Hello! How can I help?"],
+lore: ["Created to assist users"],
+style: {
+all: ["Professional"],
+chat: ["Friendly"],
+post: ["Clear"]
+}
+})
+.build();
+await agent.start();}
+main().catch(console.error);
+The sections below detail each configuration option available through the builder pattern.
+Database ConfigurationSection titled “Database Configuration”
+The database adapter provides persistence for the agent. Available options:
+SQLite
+PostgreSQL
+Supabase
+import SqliteAdapter from "@elizaos/adapter-sqlite";
+const sqliteAdapter = new SqliteDatabaseAdapter(
+new Database("./data/db.sqlite"));
+// Add database to agent.withDatabase(sqliteAdapter)
+import { PostgresDatabaseAdapter } from "@elizaos/adapter-postgres";
+const postgresAdapter = new PostgresDatabaseAdapter({
+connectionString: "postgresql://user:pass@localhost:5432/db"});
+// Add database to agent.withDatabase(postgresAdapter)
+import { SupabaseDatabaseAdapter } from "@elizaos/adapter-supabase";
+const supabaseAdapter = new SupabaseDatabaseAdapter({
+url: process.env.SUPABASE_URL,
+key: process.env.SUPABASE_KEY});
+// Add database to agent.withDatabase(supabaseAdapter)
+For more database adapters, visit
+ElizaOS Database Adapters
+ClientsSection titled “Clients”
+Clients determine how your agent can communicate:
+// Available clients.withClient(DirectClient)
+// Direct chat.withClient(TelegramClient) // Telegram bot.withClient(TwitterClient)
+// Twitter bot
+Each client may require specific environment variables. Example:
+Telegram: TELEGRAM_BOT_TOKEN
+Twitter: TWITTER_API_KEY, TWITTER_API_SECRET, etc.
+Browse all available client plugins at
+ElizaOS Client Plugins
+Model ProviderSection titled “Model Provider”
+Configure the AI model powering your agent:
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY)
+For available model providers, visit
+ElizaOS Models
+Configuring model namesSection titled “Configuring model names”
+Default model names are set for each model provider. You can check them out here
+ElizaOS model settings
+You can also set your own model names in the .env file:
+Terminal window# OpenAIOPENAI_API_KEY= # OpenAI API keyOPENAI_API_URL= # OpenAI API URLSMALL_OPENAI_MODEL= # OpenAI model nameMEDIUM_OPENAI_MODEL=LARGE_OPENAI_MODEL=EMBEDDING_OPENAI_MODEL=# AnthropicANTHROPIC_API_KEY= # Anthropic API keySMALL_ANTHROPIC_MODEL=MEDIUM_ANTHROPIC_MODEL=LARGE_ANTHROPIC_MODEL=...
+PluginsSection titled “Plugins”
+Brain Framework supports both its native plugins and ElizaOS plugins. Here’s how to add plugins to your agent:
+// Initialize pluginsconst fraxlendPlugin = await createFraxlendPlugin({
+chain: fraxtal,
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,});
+const odosPlugin = await createOdosPlugin({
+chain: fraxtal,
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,});
+// Add plugins to agent.withPlugins([fraxlendPlugin, odosPlugin])
+Browse available plugins:
+Brain Framework Plugins
+ElizaOS Plugins
+Character ConfigurationSection titled “Character Configuration”
+Define your agent’s personality and behavior:
+.withCharacter({
+name: "MyBot",
+// Display name
+bio: "Description",
+// Bot's description/purpose
+username: "mybot",
+// Unique identifier
+// Example interactions
+messageExamples: [
+[
+{
+user: "User",
+content: {
+text: "Hello",
+},
+},
+{
+user: "system",
+content: {
+text: "Hello! How can I assist you today?",
+},
+},
+],
+],
+// Additional context/background
+lore: [
+"Created to help with customer service",
+"Specializes in technical support"
+],
+// Response styling
+style: {
+all: ["Professional", "Helpful"],
+// General style
+chat: ["Conversational", "Friendly"], // Chat-specific style
+post: ["Informative", "Clear"]
+// Social media post style
+}})
+For detailed character configuration options, visit
+ElizaOS Character Configuration
+Telemetry IntegrationSection titled “Telemetry Integration”
+Enables LLM request/response telemetry with Open Telemetry via Vercel AI SDK.
+For example, here is how you can enable
+telemetry with Langsmith
+:
+import { Client } from "langsmith";import { AISDKExporter } from "langsmith/vercel";
+// Initialize Langsmith exporterconst exporter = new AISDKExporter({ client: new Client() })
+// Enable telemetry with Langsmith exporterconst agent = new AgentBuilder()
+.withTelemetry(exporter)
+//... other configurations ...
+.build();
+Similarly, you can enable telemetry with other providers like Langfuse, Honeycomb, laminar etc.
+for more information on observability integrations, see the
+Vercel AI SDK documentation
+.
+Error HandlingSection titled “Error Handling”
+Implement proper error handling for production:
+async function main() {
+try {
+const agent = new AgentBuilder()
+// ... configuration
+.build();
+await agent.start();
+} catch (error) {
+console.error("Failed to start agent:", error);
+process.exit(1);
+}}
+main().catch(console.error);
+Tip
+Remember to:
+Configure proper database persistence
+Set up all required environment variables
+Handle errors appropriately
+Monitor agent performance

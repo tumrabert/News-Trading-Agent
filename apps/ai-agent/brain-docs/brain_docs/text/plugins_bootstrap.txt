@@ -1,0 +1,47 @@
+URL: https://brain.iqai.com/plugins/bootstrap
+==================================================
+
+Bootstrap Plugin
+The Bootstrap Plugin provides essential baseline functionality for your agent, including conversation management, room control, and core evaluation capabilities.
+InstallationSection titled “Installation”
+Install the package:
+npm
+pnpm
+yarn
+Terminal windownpm i @eliza/[email protected]
+Terminal windowpnpm add @eliza/[email protected]
+Terminal windowyarn add @eliza/[email protected]
+Import and add to your agent:
+import { createBootstrapPlugin } from "@eliza/plugin-bootstrap";
+const agent = new AgentBuilder()
+.withPlugin(createBootstrapPlugin())
+.build();
+Available FeaturesSection titled “Available Features”
+ActionsSection titled “Actions”
+ActionDescriptionExample UsagecontinueContinue the current conversation flowContinue our previous discussionfollowRoomBegin following a room for updatesFollow room trading-signalsunfollowRoomStop following a roomUnfollow room general-chatignoreIgnore specific messages or patternsIgnore messages from @spambotmuteRoomMute notifications from a roomMute room announcementsunmuteRoomRestore notifications from a roomUnmute room important-alerts
+Usage ExamplesSection titled “Usage Examples”
+// Initialize plugin with default configurationconst bootstrapPlugin = createBootstrapPlugin();
+// Add to agentconst agent = new AgentBuilder()
+.withPlugin(bootstrapPlugin)
+.build();
+Configuration OptionsSection titled “Configuration Options”
+The bootstrap plugin accepts optional configuration parameters:
+interface BootstrapConfig {
+enableBoredom?: boolean;
+// Enable/disable boredom management
+timeFormat?: string;
+// Preferred time format
+factChecking?: boolean;
+// Enable/disable fact checking}
+Best PracticesSection titled “Best Practices”
+Initialize the bootstrap plugin first before other plugins
+Configure fact checking for sensitive operations
+Use room management features to organize conversations
+Implement proper error handling for actions
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Room Not Found: Verify room identifiers before follow/unfollow operations
+Action Timeout: Check network connectivity and retry the action
+Evaluation Errors: Ensure proper context is provided for fact/goal evaluation
+Provider Unavailability: Verify plugin initialization and configuration
+Tip
+The bootstrap plugin is essential for basic agent functionality. It’s recommended to include it in all agent configurations.

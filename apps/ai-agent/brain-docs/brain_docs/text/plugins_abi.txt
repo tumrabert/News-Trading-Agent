@@ -1,0 +1,102 @@
+URL: https://brain.iqai.com/plugins/abi
+==================================================
+
+ABI Plugin
+The ABI plugin provides a dynamic way to interact with any Ethereum-compatible smart contract by generating actions from the contract’s Application Binary Interface (ABI). This plugin automatically creates callable actions for both read and write functions defined in the ABI.
+InstallationSection titled “Installation”
+Install the required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/plugin-abi
+Terminal windowpnpm add @iqai/plugin-abi
+Terminal windowyarn add @iqai/plugin-abi
+Create a .env file with required configuration:
+WALLET_PRIVATE_KEY=your-wallet-private-key
+Basic SetupSection titled “Basic Setup”
+Here’s how to set up an agent with the ABI plugin:
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import { createAbiPlugin } from "@iqai/plugin-abi";import YourABI from "yourABI";import { fraxtal } from "viem/chains";
+async function main() {
+// Initialize ABI plugin
+const abiPlugin = await createAbiPlugin({
+abi: YourABI,
+contractName: "name-of-contract",
+contractAddress: "address-of-contract",
+description: "description-of-contract",
+privateKey: process.env.WALLET_PRIVATE_KEY,
+chain: fraxtal, // Optional, defaults to Fraxtal chain
+});
+// Create agent with plugin
+const agent = new AgentBuilder()
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withPlugin(abiPlugin)
+.build();
+await agent.start();}
+main().catch(console.error);
+How It WorksSection titled “How It Works”
+The ABI plugin works by:
+Analyzing the provided contract ABI
+Extracting function definitions (both read and write)
+Generating corresponding actions for each function
+Automatically handling parameter parsing and response formatting
+Available OperationsSection titled “Available Operations”
+The plugin dynamically creates actions based on the ABI functions provided. Each function in the ABI is transformed into an action with the naming pattern CONTRACT_NAME_FUNCTION_NAME.
+Example ERC20 ActionsSection titled “Example ERC20 Actions”
+When using the plugin with an ERC20 contract, the following actions would be automatically created:
+Action NameDescriptionFunction TypeERC20_BALANCE_OFCheck token balanceRead functionERC20_TRANSFERTransfer tokensWrite functionERC20_APPROVEApprove token spendingWrite functionERC20_TRANSFER_FROMTransfer tokens from another addressWrite functionERC20_ALLOWANCECheck spending allowanceRead functionERC20_TOTAL_SUPPLYGet total token supplyRead function
+Usage ExamplesSection titled “Usage Examples”
+Here’s how to interact with your ABI-enabled agent:
+Querying Token BalanceSection titled “Querying Token Balance”
+Query:
+What's the balance of 0x1234...5678?
+The agent will parse this query, identify the address, and call the appropriate contract function (balanceOf).
+Response:
+✅ Successfully called balanceOf
+Result: "1000000000000000000"
+Transferring TokensSection titled “Transferring Tokens”
+Query:
+Transfer 10 tokens to 0x1234...5678
+The agent will parse this query, extract the amount and recipient address, and execute the transfer function.
+Response:
+✅ Successfully executed transfer
+Transaction hash: 0x123abc...
+You can view this transaction on the blockchain explorer.
+Configuration OptionsSection titled “Configuration Options”
+The ABI plugin accepts these configuration parameters:
+interface AbiPluginOptions {
+abi: any[];
+// Smart contract ABI
+contractName: string;
+// Name for the contract (used in action names)
+contractAddress: `0x${string}`;
+// Contract address
+description: string;
+// Description for the plugin
+privateKey: string;
+// Private key for transactions
+chain?: Chain;
+// Optional: blockchain network (defaults to Fraxtal)}
+Error HandlingSection titled “Error Handling”
+The plugin handles various error scenarios:
+Invalid function arguments
+❌ Error parsing arguments: Expected number, got string
+Transaction execution failures
+❌ Error with transfer: execution reverted: ERC20: transfer amount exceeds balance
+Network connection issues
+❌ Error with balanceOf: network connection failed
+Best PracticesSection titled “Best Practices”
+Store private keys securely: Never hardcode private keys in your application code. Always use environment variables.
+Use proper error handling: Implement try/catch blocks around plugin initialization and usage.
+Test with testnets first: Before using the plugin with mainnet contracts, test thoroughly on testnet networks.
+Validate ABIs: Ensure that the ABI you provide is valid and complete.
+Handle gas efficiently: For write functions, be aware of gas costs and implement proper error handling for insufficient gas scenarios.
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Invalid ABI Format: Ensure your ABI is correctly formatted JSON
+Contract Address Format: The contract address must be a valid Ethereum address starting with “0x”
+Function Not Found: Verify that the function you’re trying to call exists in the ABI
+Transaction Failures: Check for sufficient balance and proper permissions
+Note
+The ABI plugin is compatible with any Ethereum Virtual Machine (EVM) compatible blockchain that works with the viem library, including Ethereum, Fraxtal, Arbitrum, Optimism, Polygon, and more.

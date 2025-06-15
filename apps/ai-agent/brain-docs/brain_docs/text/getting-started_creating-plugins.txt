@@ -1,0 +1,130 @@
+URL: https://brain.iqai.com/getting-started/creating-plugins
+==================================================
+
+Creating Plugins
+Brain Framework provides two approaches to plugin development: a simplified utility method and the standard plugin structure.
+Plugin IntegrationSection titled “Plugin Integration”
+To use your plugin, integrate it with the agent builder:
+const agent = new AgentBuilder()
+.withPlugin(yourPlugin)
+// ... other configurations
+.build();
+Quick Plugin CreationSection titled “Quick Plugin Creation”
+Brain Framework’s createSimplePlugin utility lets you create plugins with minimal boilerplate:
+import { createSimplePlugin } from "@iqai/agent";
+const yourPlugin = createSimplePlugin({
+name: "your-plugin",
+description: "Your plugin description",
+actions: [
+{
+name: "action-name",
+description: "Action description",
+handler: async (opts) => {
+try {
+// Your action logic here
+opts.callback?.({
+text: "Action response"
+});
+return true;
+} catch (error) {
+console.error('Error in action handler:', error);
+opts.callback?.({
+text: "❌ Action error"
+});
+return false;
+}
+}
+}
+]});
+Example: Time PluginSection titled “Example: Time Plugin”
+Here’s a practical example using the simplified approach:
+const timePlugin = createSimplePlugin({
+name: "time-plugin",
+description: "Provides current time and timezone information",
+actions: [
+{
+name: "TELL_TIME",
+description: "Returns the current time in different formats",
+handler: async (opts) => {
+const now = new Date();
+const localTime = now.toLocaleTimeString();
+const utcTime = now.toUTCString();
+opts.callback?.({
+text: `🕒 Current time:\nLocal: ${localTime}\nUTC: ${utcTime}`
+});
+return true;
+}
+}
+]});
+Full Plugin StructureSection titled “Full Plugin Structure”
+When your plugin needs advanced features like:
+Custom service implementations
+Data providers
+Complex state management
+Custom evaluators
+Multiple interconnected actions
+You can leverage the full plugin structure:
+Directory StructureSection titled “Directory Structure”
+Terminal windowpackages/
+plugin-your-feature/
+src/
+__tests__/
+# Test files
+actions/
+# Action definitions
+services/
+# Services for business logic
+lib/
+# Utility functions
+index.ts
+# Main plugin export
+types.ts
+# Type definitions
+README.md
+# Plugin documentation
+package.json
+ImplementationSection titled “Implementation”
+Main plugin file (index.ts):
+export async function createYourPlugin(opts: YourPluginParams): Promise<Plugin> {
+const actions = [
+getActionOne(opts),
+getActionTwo(opts),
+];
+return {
+name: "Your Plugin",
+description: "Description of your plugin",
+providers: [],
+evaluators: [],
+services: [],
+actions,
+};}
+export default createYourPlugin;
+Action definition:
+export const getYourAction = (opts: YourPluginParams): Action => {
+return {
+name: "YOUR_ACTION_NAME",
+description: "What your action does",
+similes: [
+"ALTERNATIVE_COMMAND_1",
+"ALTERNATIVE_COMMAND_2"
+],
+validate: async () => true,
+handler: handler(opts),
+examples: [
+{
+user: "user",
+content: { text: "EXAMPLE_COMMAND" },
+}
+],
+};};
+Best PracticesSection titled “Best Practices”
+Use kebab-case for plugin names (e.g., plugin-your-feature)
+Use Upper kebab-case for action names (e.g., YOUR_ACTION_NAME)
+Implement proper error handling using try-catch blocks
+Include comprehensive documentation
+Add meaningful tests under __tests__ directory
+Use descriptive names for actions and functions
+Keep services separate from actions
+Include examples for each action
+For detailed information about plugin development, including advanced features and examples, visit
+Plugin Development Guide

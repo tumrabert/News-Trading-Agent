@@ -1,0 +1,34 @@
+URL: https://brain.iqai.com/getting-started/test-agent
+==================================================
+
+Testing Your Agent
+Brain provides a powerful web interface to test and interact with your agents. This guide shows you how to set it up and use it effectively.
+Caution
+Your agent must have direct client enabled to use console.
+To enable, add it to your agent’s client list:import { AgentBuilder } from "@iqai/agent"import { DirectClientInterface } from "@elizaos/client-direct"
+const agent = new AgentBuilder()
+.withClient(DirectClient)
+Using console.iqai.comSection titled “Using console.iqai.com”
+Start your agent with direct client enabled
+Wait until you find this message in your console:
+Terminal window╔════════════════════════════════════════════╗║
+*~* Direct client initialized *~*
+║║
+you can test out your agents in:
+║║
+https://console.iqai.com
+║╚════════════════════════════════════════════╝
+Visit console.iqai.com
+Your agent will appear automatically in the interface
+What You Can TestSection titled “What You Can Test”
+Through console.iqai.com you can:
+Chat with your agent in real-time
+Test plugin commands and responses
+Validate response formats
+Check character consistency
+Monitor agent behavior
+Best PracticesSection titled “Best Practices”
+Always keep the DirectClientInterface enabled during development
+Use console.iqai.com for rapid testing and debugging
+Test all plugin functionalities through the interface
+Verify agent responses match your expected formats

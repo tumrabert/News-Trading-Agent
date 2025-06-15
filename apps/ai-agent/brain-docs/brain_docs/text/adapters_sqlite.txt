@@ -1,0 +1,39 @@
+URL: https://brain.iqai.com/adapters/sqlite
+==================================================
+
+SQLite Adapter
+The SQLite Adapter provides embedded database functionality, ideal for development and single-instance deployments. Visit Elizaos
+SQLite Adapter docs
+for more details.
+InstallationSection titled “Installation”
+Install required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/adapter-sqlite
+Terminal windowpnpm add github:elizaos-plugins/adapter-sqlite
+Terminal windowyarn add github:elizaos-plugins/adapter-sqlite
+Basic SetupSection titled “Basic Setup”
+import { AgentBuilder } from "@iqai/agent";import SqliteAdapter from "@elizaos/adapter-sqlite";
+const databaseAdapter = new SqliteDatabaseAdapter();
+const agent = new AgentBuilder()
+.withDatabase(databaseAdapter)
+// ... other configuration
+.build();
+Key FeaturesSection titled “Key Features”
+✔️ Built-in caching
+✔️ BLOB storage support
+✔️ Zero setup requirements
+Collections StructureSection titled “Collections Structure”
+The adapter automatically manages these collections:
+rooms
+participants
+accounts
+memories
+knowledge
+Additional metadata is stored as JSON within these collections.
+Best PracticesSection titled “Best Practices”
+✔️ Use for development and testing
+✔️ Monitor database file size
+Tip
+SQLite is ideal for development, testing, and single-instance deployments where simplicity is key.

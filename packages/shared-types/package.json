@@ -1,0 +1,22 @@
+{
+  "name": "@workspace/shared-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript types for the onchain-signal workspace",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.3"
+  },
+  "dependencies": {},
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  }
+}

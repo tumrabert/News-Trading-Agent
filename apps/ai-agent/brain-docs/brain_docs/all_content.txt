@@ -1,0 +1,2187 @@
+
+================================================================================
+TITLE: Overview | Brain Framework
+URL: https://brain.iqai.com/getting-started/overview
+================================================================================
+
+Overview
+IntroductionSection titled “Introduction”
+Brain Framework is a developer-first toolkit for building AI agents with enhanced flexibility and type safety. It provides a TypeScript-first approach to agent configuration and development.
+Why Brain Framework?Section titled “Why Brain Framework?”
+While ElizaOS offers an excellent foundation for AI agents through character.json configurations, many developers seek more programmatic control and type safety in their agent development workflow. Brain Framework addresses this by providing:
+Code-based configuration with full TypeScript support
+Builder pattern for intuitive agent setup
+Enhanced developer experience with improved tooling
+Full compatibility with existing ElizaOS plugins
+Specialized core plugins for advanced functionality
+Key FeaturesSection titled “Key Features”
+Type-Safe Configuration: Move beyond character.json with fully typed configuration options
+Builder Pattern: Intuitive API for constructing and configuring agents
+Core Plugins:
+Heartbeat: Simplified cron job implementation
+Sequencer: Chain multiple actions from a single user query
+ATP Integration: Ready for agent tokenization
+Extended Plugin System: Create custom plugins with improved utilities and helpers
+Core ConceptsSection titled “Core Concepts”
+Agent
+Configured through code using AgentBuilder, providing type-safe setup and flexible configuration options.
+Clients
+Type-safe communication interfaces for various platforms (Direct, Telegram, Twitter) with improved error handling.
+Plugins
+Enhanced plugin system with utilities for easier development. Includes specialized plugins for DeFi operations, scheduling, and more.
+Model Providers
+Structured integration with AI models (OpenAI, Claude, etc.) maintaining type safety throughout.
+For IQAI ATP UsersSection titled “For IQAI ATP Users”
+If you’re planning to tokenize your agents through IQAI’s ATP platform, Brain Framework is the recommended choice for development. It provides seamless integration with the ATP ecosystem while maintaining full flexibility for standalone use.
+
+================================================================================
+
+================================================================================
+TITLE: Quick Start | Brain Framework
+URL: https://brain.iqai.com/getting-started/quickstart
+================================================================================
+
+Quick Start
+In this guide, we’ll create a basic AI agent using Brain Framework from scratch. Before we go further, ensure you have Nodejs installed on your machine. You can download it from here.
+Caution
+Node version should be 23.x. Any version below 23 will not work.
+Using Brain Starter TemplateSection titled “Using Brain Starter Template”
+The fastest way to get started is using our pre-configured starter template which has all the basic setup ready to go.
+Clone the brain-starter repository:
+Terminal windowgit clone https://github.com/IQAIcom/brain-starter.git my-brain-agentcd my-brain-agent
+Install the dependencies:
+npm
+pnpm
+yarn
+Terminal windownpm install
+Terminal windowpnpm install
+Terminal windowyarn install
+Start the development server:
+npm
+pnpm
+yarn
+Terminal windownpm run dev
+Terminal windowpnpm run dev
+Terminal windowyarn run dev
+Test your agent:
+After starting your agent, visit IQAI Console to interact with it through a ready-to-use interface. This allows you to test your agent without building a custom client application.
+Creating a New Project From ScratchSection titled “Creating a New Project From Scratch”
+If you prefer to set up your project from scratch, you can follow these steps:
+Set up your project structure:
+Terminal windowmkdir -p my-brain-agent/{src,data} && cd my-brain-agent
+Setup project
+Terminal windownpm init
+npm
+pnpm
+yarn
+Terminal windownpm i -D typescript && npx tsc --init
+Terminal windowpnpm add -D typescript && npx tsc --init
+Terminal windowyarn add -D typescript && npx tsc --init
+Create index and env file
+Terminal windowtouch src/index.ts .env
+Install the required Brain Framework packages:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/agent github:elizaos-plugins/adapter-sqlite @elizaos/[email protected] sharp dotenv
+Terminal windowpnpm add @iqai/agent github:elizaos-plugins/adapter-sqlite @elizaos/[email protected] sharp dotenv
+Terminal windowyarn add @iqai/agent github:elizaos-plugins/adapter-sqlite @elizaos/[email protected] sharp dotenv
+Add your OpenAI API key to the .env file:
+OPENAI_API_KEY=your_openai_api_key_here
+Creating Your First AgentSection titled “Creating Your First Agent”
+To create an agent, you’ll need three key components:
+LLM Model Provider: Choose your preferred language model (OpenAI, Claude, etc.) that will power your agent’s intelligence.
+Client Interface: Select how users will interact with your agent. Brain Framework supports various client integrations including Discord, Telegram, Twitter, Instagram, WhatsApp and more. In this example, we’ll use the Direct client which provides HTTP endpoints for interaction.
+Prompts and Plugins: Define your agent’s behavior through prompts and extend functionality using plugins. In this quickstart example, we’ll use the default prompts that come with the framework. For customizing prompts and adding plugins, check out Agent Creation Guide.
+Open src/index.ts in your favorite code editor and add the following code:
+import SqliteAdapter from "@elizaos/adapter-sqlite";import DirectClient from "@elizaos/client-direct";import { AgentBuilder, ModelProviderName } from "@iqai/agent";import dotenv from "dotenv";
+// Load environment variablesdotenv.config();
+async function main() {
+// Create your agent with basic configuration
+const agent = new AgentBuilder()
+.withModelProvider(ModelProviderName.OPENAI, process.env.OPENAI_API_KEY)
+.withDatabase(SqliteAdapter)
+.withClient(DirectClient)
+.build();
+// Start your agent
+await agent.start();
+console.log("Agent is running! You can test it using the IQAI Console.");}
+main().catch(console.error);
+Update your package.json to support ES modules and scripts:
+{
+"type": "module",
+"scripts": {
+"dev": "node src/index.ts"
+}}
+Run your agent:
+npm
+pnpm
+yarn
+Terminal windownpm run dev
+Terminal windowpnpm run dev
+Terminal windowyarn run dev
+Test your agent:
+After starting your agent, visit IQAI Console to interact with it through a ready-to-use interface. This allows you to test your agent without building a custom client application.
+For more details on testing your agent, check out Testing Your Agent
+Next StepsSection titled “Next Steps”
+Now that you have a basic agent running, you can:
+Explore different options you can pass though Agent
+Add Plugins to extend your agent’s functionality
+Create your own plugins using Plugin Creation Guide
+Deploy your agent to a production environment
+Check out our
+Examples Repo
+to see more advanced use cases
+
+================================================================================
+
+================================================================================
+TITLE: Agent Creation | Brain Framework
+URL: https://brain.iqai.com/getting-started/agent-creation
+================================================================================
+
+Agent Creation
+Brain Framework uses a builder pattern for creating agents, allowing flexible configuration of databases, clients, model providers, plugins and character settings.
+Before diving into individual configuration options, here’s how all the pieces come together using Brain Framework’s builder pattern:
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import SqliteAdapter from "@elizaos/adapter-sqlite";import DirectClient from "@elizaos/client-direct";
+async function main() {
+const agent = new AgentBuilder()
+.withDatabase(SqliteAdapter)
+.withClient(DirectClient)
+.withModelProvider(ModelProviderName.OPENAI, process.env.OPENAI_API_KEY)
+.withCharacter({
+name: "MyBot",
+bio: "A helpful assistant",
+username: "mybot",
+messageExamples: ["Hello! How can I help?"],
+lore: ["Created to assist users"],
+style: {
+all: ["Professional"],
+chat: ["Friendly"],
+post: ["Clear"]
+}
+})
+.build();
+await agent.start();}
+main().catch(console.error);
+The sections below detail each configuration option available through the builder pattern.
+Database ConfigurationSection titled “Database Configuration”
+The database adapter provides persistence for the agent. Available options:
+SQLite
+PostgreSQL
+Supabase
+import SqliteAdapter from "@elizaos/adapter-sqlite";
+const sqliteAdapter = new SqliteDatabaseAdapter(
+new Database("./data/db.sqlite"));
+// Add database to agent.withDatabase(sqliteAdapter)
+import { PostgresDatabaseAdapter } from "@elizaos/adapter-postgres";
+const postgresAdapter = new PostgresDatabaseAdapter({
+connectionString: "postgresql://user:pass@localhost:5432/db"});
+// Add database to agent.withDatabase(postgresAdapter)
+import { SupabaseDatabaseAdapter } from "@elizaos/adapter-supabase";
+const supabaseAdapter = new SupabaseDatabaseAdapter({
+url: process.env.SUPABASE_URL,
+key: process.env.SUPABASE_KEY});
+// Add database to agent.withDatabase(supabaseAdapter)
+For more database adapters, visit
+ElizaOS Database Adapters
+ClientsSection titled “Clients”
+Clients determine how your agent can communicate:
+// Available clients.withClient(DirectClient)
+// Direct chat.withClient(TelegramClient) // Telegram bot.withClient(TwitterClient)
+// Twitter bot
+Each client may require specific environment variables. Example:
+Telegram: TELEGRAM_BOT_TOKEN
+Twitter: TWITTER_API_KEY, TWITTER_API_SECRET, etc.
+Browse all available client plugins at
+ElizaOS Client Plugins
+Model ProviderSection titled “Model Provider”
+Configure the AI model powering your agent:
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY)
+For available model providers, visit
+ElizaOS Models
+Configuring model namesSection titled “Configuring model names”
+Default model names are set for each model provider. You can check them out here
+ElizaOS model settings
+You can also set your own model names in the .env file:
+Terminal window# OpenAIOPENAI_API_KEY= # OpenAI API keyOPENAI_API_URL= # OpenAI API URLSMALL_OPENAI_MODEL= # OpenAI model nameMEDIUM_OPENAI_MODEL=LARGE_OPENAI_MODEL=EMBEDDING_OPENAI_MODEL=# AnthropicANTHROPIC_API_KEY= # Anthropic API keySMALL_ANTHROPIC_MODEL=MEDIUM_ANTHROPIC_MODEL=LARGE_ANTHROPIC_MODEL=...
+PluginsSection titled “Plugins”
+Brain Framework supports both its native plugins and ElizaOS plugins. Here’s how to add plugins to your agent:
+// Initialize pluginsconst fraxlendPlugin = await createFraxlendPlugin({
+chain: fraxtal,
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,});
+const odosPlugin = await createOdosPlugin({
+chain: fraxtal,
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,});
+// Add plugins to agent.withPlugins([fraxlendPlugin, odosPlugin])
+Browse available plugins:
+Brain Framework Plugins
+ElizaOS Plugins
+Character ConfigurationSection titled “Character Configuration”
+Define your agent’s personality and behavior:
+.withCharacter({
+name: "MyBot",
+// Display name
+bio: "Description",
+// Bot's description/purpose
+username: "mybot",
+// Unique identifier
+// Example interactions
+messageExamples: [
+[
+{
+user: "User",
+content: {
+text: "Hello",
+},
+},
+{
+user: "system",
+content: {
+text: "Hello! How can I assist you today?",
+},
+},
+],
+],
+// Additional context/background
+lore: [
+"Created to help with customer service",
+"Specializes in technical support"
+],
+// Response styling
+style: {
+all: ["Professional", "Helpful"],
+// General style
+chat: ["Conversational", "Friendly"], // Chat-specific style
+post: ["Informative", "Clear"]
+// Social media post style
+}})
+For detailed character configuration options, visit
+ElizaOS Character Configuration
+Telemetry IntegrationSection titled “Telemetry Integration”
+Enables LLM request/response telemetry with Open Telemetry via Vercel AI SDK.
+For example, here is how you can enable
+telemetry with Langsmith
+:
+import { Client } from "langsmith";import { AISDKExporter } from "langsmith/vercel";
+// Initialize Langsmith exporterconst exporter = new AISDKExporter({ client: new Client() })
+// Enable telemetry with Langsmith exporterconst agent = new AgentBuilder()
+.withTelemetry(exporter)
+//... other configurations ...
+.build();
+Similarly, you can enable telemetry with other providers like Langfuse, Honeycomb, laminar etc.
+for more information on observability integrations, see the
+Vercel AI SDK documentation
+.
+Error HandlingSection titled “Error Handling”
+Implement proper error handling for production:
+async function main() {
+try {
+const agent = new AgentBuilder()
+// ... configuration
+.build();
+await agent.start();
+} catch (error) {
+console.error("Failed to start agent:", error);
+process.exit(1);
+}}
+main().catch(console.error);
+Tip
+Remember to:
+Configure proper database persistence
+Set up all required environment variables
+Handle errors appropriately
+Monitor agent performance
+
+================================================================================
+
+================================================================================
+TITLE: Creating Plugins | Brain Framework
+URL: https://brain.iqai.com/getting-started/creating-plugins
+================================================================================
+
+Creating Plugins
+Brain Framework provides two approaches to plugin development: a simplified utility method and the standard plugin structure.
+Plugin IntegrationSection titled “Plugin Integration”
+To use your plugin, integrate it with the agent builder:
+const agent = new AgentBuilder()
+.withPlugin(yourPlugin)
+// ... other configurations
+.build();
+Quick Plugin CreationSection titled “Quick Plugin Creation”
+Brain Framework’s createSimplePlugin utility lets you create plugins with minimal boilerplate:
+import { createSimplePlugin } from "@iqai/agent";
+const yourPlugin = createSimplePlugin({
+name: "your-plugin",
+description: "Your plugin description",
+actions: [
+{
+name: "action-name",
+description: "Action description",
+handler: async (opts) => {
+try {
+// Your action logic here
+opts.callback?.({
+text: "Action response"
+});
+return true;
+} catch (error) {
+console.error('Error in action handler:', error);
+opts.callback?.({
+text: "❌ Action error"
+});
+return false;
+}
+}
+}
+]});
+Example: Time PluginSection titled “Example: Time Plugin”
+Here’s a practical example using the simplified approach:
+const timePlugin = createSimplePlugin({
+name: "time-plugin",
+description: "Provides current time and timezone information",
+actions: [
+{
+name: "TELL_TIME",
+description: "Returns the current time in different formats",
+handler: async (opts) => {
+const now = new Date();
+const localTime = now.toLocaleTimeString();
+const utcTime = now.toUTCString();
+opts.callback?.({
+text: `🕒 Current time:\nLocal: ${localTime}\nUTC: ${utcTime}`
+});
+return true;
+}
+}
+]});
+Full Plugin StructureSection titled “Full Plugin Structure”
+When your plugin needs advanced features like:
+Custom service implementations
+Data providers
+Complex state management
+Custom evaluators
+Multiple interconnected actions
+You can leverage the full plugin structure:
+Directory StructureSection titled “Directory Structure”
+Terminal windowpackages/
+plugin-your-feature/
+src/
+__tests__/
+# Test files
+actions/
+# Action definitions
+services/
+# Services for business logic
+lib/
+# Utility functions
+index.ts
+# Main plugin export
+types.ts
+# Type definitions
+README.md
+# Plugin documentation
+package.json
+ImplementationSection titled “Implementation”
+Main plugin file (index.ts):
+export async function createYourPlugin(opts: YourPluginParams): Promise<Plugin> {
+const actions = [
+getActionOne(opts),
+getActionTwo(opts),
+];
+return {
+name: "Your Plugin",
+description: "Description of your plugin",
+providers: [],
+evaluators: [],
+services: [],
+actions,
+};}
+export default createYourPlugin;
+Action definition:
+export const getYourAction = (opts: YourPluginParams): Action => {
+return {
+name: "YOUR_ACTION_NAME",
+description: "What your action does",
+similes: [
+"ALTERNATIVE_COMMAND_1",
+"ALTERNATIVE_COMMAND_2"
+],
+validate: async () => true,
+handler: handler(opts),
+examples: [
+{
+user: "user",
+content: { text: "EXAMPLE_COMMAND" },
+}
+],
+};};
+Best PracticesSection titled “Best Practices”
+Use kebab-case for plugin names (e.g., plugin-your-feature)
+Use Upper kebab-case for action names (e.g., YOUR_ACTION_NAME)
+Implement proper error handling using try-catch blocks
+Include comprehensive documentation
+Add meaningful tests under __tests__ directory
+Use descriptive names for actions and functions
+Keep services separate from actions
+Include examples for each action
+For detailed information about plugin development, including advanced features and examples, visit
+Plugin Development Guide
+
+================================================================================
+
+================================================================================
+TITLE: Testing Your Agent | Brain Framework
+URL: https://brain.iqai.com/getting-started/test-agent
+================================================================================
+
+Testing Your Agent
+Brain provides a powerful web interface to test and interact with your agents. This guide shows you how to set it up and use it effectively.
+Caution
+Your agent must have direct client enabled to use console.
+To enable, add it to your agent’s client list:import { AgentBuilder } from "@iqai/agent"import { DirectClientInterface } from "@elizaos/client-direct"
+const agent = new AgentBuilder()
+.withClient(DirectClient)
+Using console.iqai.comSection titled “Using console.iqai.com”
+Start your agent with direct client enabled
+Wait until you find this message in your console:
+Terminal window╔════════════════════════════════════════════╗║
+*~* Direct client initialized *~*
+║║
+you can test out your agents in:
+║║
+https://console.iqai.com
+║╚════════════════════════════════════════════╝
+Visit console.iqai.com
+Your agent will appear automatically in the interface
+What You Can TestSection titled “What You Can Test”
+Through console.iqai.com you can:
+Chat with your agent in real-time
+Test plugin commands and responses
+Validate response formats
+Check character consistency
+Monitor agent behavior
+Best PracticesSection titled “Best Practices”
+Always keep the DirectClientInterface enabled during development
+Use console.iqai.com for rapid testing and debugging
+Test all plugin functionalities through the interface
+Verify agent responses match your expected formats
+
+================================================================================
+
+================================================================================
+TITLE: Deployment | Brain Framework
+URL: https://brain.iqai.com/getting-started/deployment
+================================================================================
+
+Deployment
+This guide covers deploying your Brain Framework agent on any long running Node.js server environment, including database setup considerations.
+Caution
+Currently some plugins don’t support serverless deployments. but we are
+planning to add support for serverless deployments in the future.
+Database SelectionSection titled “Database Selection”
+Choose the appropriate database adapter based on your deployment needs:
+PostgreSQL
+@elizaos/adapter-postgres
+Recommended for production deployments
+Scalable and robust
+SQLite
+@elizaos/adapter-sqlite
+Great for development and small deployments
+Self-contained file database
+Supabase
+@elizaos/adapter-supabase
+Cloud-native solution
+Managed database service
+Server RequirementsSection titled “Server Requirements”
+Node.js 22 or higher
+pnpm 9.x (recommended)
+Database system based on chosen adapter
+Persistent storage for database files (if using SQLite)
+Production SetupSection titled “Production Setup”
+Install required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/adapter-postgres
+Terminal windowpnpm add github:elizaos-plugins/adapter-postgres
+Terminal windowyarn add github:elizaos-plugins/adapter-postgres
+Create a PM2 ecosystem file (ecosystem.config.js):
+module.exports = {
+apps: [
+{
+name: "brain-agent",
+script: "./dist/index.js",
+instances: 1,
+autorestart: true,
+watch: false,
+max_memory_restart: "1G",
+env: {
+NODE_ENV: "production",
+DATABASE_URL: "postgresql://user:pass@localhost:5432/db",
+},
+},
+],};
+Configure your database adapter:
+import { AgentBuilder } from "@iqai/agent";import { PostgresDatabaseAdapter } from "@elizaos/adapter-postgres";
+const agent = new AgentBuilder()
+.withDatabase(
+new PostgresDatabaseAdapter({
+connectionString: process.env.DATABASE_URL,
+})
+)
+.build();
+Build and start:
+Terminal window
+pnpm build
+pm2 start ecosystem.config.js
+Database-Specific ConsiderationsSection titled “Database-Specific Considerations”
+PostgreSQL
+SQLite
+Supabase
+Terminal window# Required environment variablesDATABASE_URL=postgresql://user:pass@localhost:5432/db
+Terminal window# Set file location DATABASE_PATH=./data/agent.db
+Terminal window# Required environment variables SUPABASE_URL=your-project-urlSUPABASE_KEY=your-api-key
+Digital Ocean Deployment GuideSection titled “Digital Ocean Deployment Guide”
+Create a dropletSection titled “Create a droplet”
+Here is a link to Digital Ocean guide to create a droplet: Setup a DO Droplet
+Initial Server SetupSection titled “Initial Server Setup”
+Connect to your droplet:
+Terminal windowssh root@your_droplet_ip
+Update the system:
+Terminal windowsudo apt update && sudo apt upgrade -y
+Installing and Configuring NGINXSection titled “Installing and Configuring NGINX”
+Install NGINX
+Terminal windowsudo apt install nginx -y
+Start and Enable NGINX
+Terminal windowsudo systemctl start nginxsudo systemctl enable nginx
+Verify the Installation
+Terminal windowsudo systemctl status nginx
+You can also open your web browser and navigate to:
+Terminal windowhttp://your_droplet_ip
+Configure Firewall for NGINX
+Terminal windowsudo apt install ufw -ysudo ufw allow 'Nginx Full'
+Test and Reload NGINX Configuration
+Terminal windowsudo nginx -tsudo systemctl reload nginx
+Network ConfigurationSection titled “Network Configuration”
+Install Net Tools
+Terminal windowsudo apt install net-tools -ynetstat --version
+Configure Firewall for Your Application
+Terminal windowsudo ufw allow ssh
+# or sudo ufw allow 22/tcpsudo ufw allow 3000/tcp
+# Adjust port as needed for your applicationsudo ufw reloadsudo ufw enablesudo ufw status
+Setting Up GitSection titled “Setting Up Git”
+Install Git
+Terminal windowsudo apt install git -ygit --version
+Configure Git (optional depending on use case)
+Terminal windowgit config --global user.name "Your Name"git config --global user.email "[email protected]"
+Node.js Environment SetupSection titled “Node.js Environment Setup”
+Install Node.js
+Terminal windowcurl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -sudo apt install -y nodejs
+Verify Node.js Installation
+Terminal windownode -vnpm -v
+Install PNPM
+Terminal windownpm install -g pnpmpnpm -v
+Clone Your RepositorySection titled “Clone Your Repository”
+Terminal windowsudo mkdir -p /home/ubuntu/cd /home/ubuntugit clone https://github.com/username/repository.gitcd your-projectpnpm install
+Deployment MethodsSection titled “Deployment Methods”
+You can use the following methods to deploy your agent: PM2, Docker, and Docker Compose.
+PM2
+Docker
+Docker Compose
+PM2 Process ManagerSection titled “PM2 Process Manager”Install PM2Terminal windowsudo npm install -g pm2Set Up PM2 to Start on Boot (Optional)Terminal windowpm2 startup systemdpm2 saveStart Your Application with PM2Terminal windowpm2 start "pnpm dev" --name your-app-nameBasic PM2 CommandsTerminal window# Restart applicationpm2 restart your-app-name
+# Stop applicationpm2 stop your-app-name
+# Delete application from PM2pm2 delete your-app-name
+# View running applicationspm2 list
+# Monitor applicationpm2 monit
+Docker Deployment (Direct)Section titled “Docker Deployment (Direct)”Install DockerTerminal windowsudo apt install docker.io -ysudo systemctl start dockersudo systemctl enable dockerDeploy with DockerTerminal window# Build your Docker imagedocker build -t image_name .
+# Run your containerdocker run -d --name container_name -p host_port:container_port image_name
+# Stop and remove containerdocker stop container_namedocker rm container_nameSample SetupFROM node:23-slim
+WORKDIR /app
+# Install pnpmRUN npm install -g pnpm
+# Copy package files and install dependenciesCOPY package.json pnpm-lock.yaml* ./RUN pnpm install
+# Copy project filesCOPY src/ ./src/COPY tsconfig.json ./COPY .env ./
+# Create data directory for SQLiteRUN mkdir -p data
+# Run the applicationCMD ["pnpm", "dev"]Build and run:Terminal windowdocker build -t brain-agent .docker run -d \
+-p 3000:3000 \
+--name brain-agent \
+-e DATABASE_URL=postgresql://user:pass@host:5432/db \
+brain-agentCommon commands:Terminal window# Stop containerdocker stop brain-agent
+# Start containerdocker start brain-agent
+# View logsdocker logs -f brain-agent
+Docker Compose DeploymentSection titled “Docker Compose Deployment”Install Docker ComposeTerminal windowsudo apt install docker-compose -yCreate docker-compose.yml:version: '3.8'services:
+app:
+build: .
+ports:
+- "3000:3000"
+environment:
+DATABASE_URL: postgresql://user:pass@db:5432/db
+depends_on:
+- db
+db:
+image: postgres:15
+environment:
+POSTGRES_USER: user
+POSTGRES_PASSWORD: pass
+POSTGRES_DB: db
+volumes:
+- postgres_data:/var/lib/postgresql/data
+volumes:
+postgres_data:Deploy with Docker ComposeTerminal window# Navigate to your project directorycd /path/to/your/project
+# Create or modify docker-compose.yml file# Run your containersdocker-compose up --build -d
+# Stop and remove containersdocker-compose downManagement commands:Terminal window# View logsdocker-compose logs -f
+SSL Configuration (Optional)Section titled “SSL Configuration (Optional)”
+Install Certbot for Let’s Encrypt SSL
+Terminal windowsudo apt install certbot python3-certbot-nginx -y
+Obtain SSL Certificate
+Terminal windowsudo certbot --nginx -d yourdomain.com -d www.yourdomain.com
+TroubleshootingSection titled “Troubleshooting”
+Check NGINX Logs
+Terminal windowsudo tail -f /var/log/nginx/access.logsudo tail -f /var/log/nginx/error.log
+Check System Resources
+Terminal windowhtop
+# Install with: sudo apt install htop
+Setting up Github CI/CDSection titled “Setting up Github CI/CD”
+Create a folder .github/workflows in your project root
+Then a file ci.yml in the folder .github/workflows created in your project root
+Copy and paste the following code in the ci.yml, you can edit further to your specification
+Terminal windowname: Brain Agent CI/CD
+on:
+push:
+branches: [main]
+jobs:
+lint-and-test:
+runs-on: ubuntu-latest
+steps:
+- uses: actions/checkout@v4
+- name: Setup pnpm
+uses: pnpm/action-setup@v2
+with:
+version: 10
+- name: Setup Node.js
+uses: actions/setup-node@v4
+with:
+node-version: "22"
+cache: "pnpm"
+- name: Install dependencies
+run: pnpm install
+- name: Lint
+run: pnpm lint
+build:
+runs-on: ubuntu-latest
+steps:
+- uses: actions/checkout@v4
+- name: Setup Node.js
+uses: actions/setup-node@v4
+with:
+node-version: "22"
+cache: "pnpm"
+- name: Setup pnpm
+uses: pnpm/action-setup@v2
+with:
+version: 10
+- name: Install dependencies
+run: pnpm install
+- name: Build
+run: pnpm build
+env:
+LIST_YOUR_ENV_KEYS: ${{ secrets.GET_THE_SET_VALUES_IN_GITHUB_SECRET }}
+deploy:
+needs: build
+runs-on: ubuntu-latest
+environment: production
+steps:
+- name: Checkout code
+uses: actions/checkout@v4
+- name: Setup Node.js
+uses: actions/setup-node@v4
+with:
+node-version: "22"
+- name: Setup pnpm
+uses: pnpm/action-setup@v2
+with:
+version: 10
+- name: Install dependencies
+run: pnpm install
+- name: Get changed files
+id: changed-files
+uses: tj-actions/changed-files@v41
+with:
+files: |
+apps/**
+- name: Deploy to Server
+if: steps.changed-files.outputs.any_changed == 'true'
+uses: appleboy/[email protected]
+with:
+host: ${{ secrets.DIGITALOCEAN_HOST }}
+username: ${{ secrets.DIGITALOCEAN_USER }}
+key: ${{ secrets.DIGITALOCEAN_PRIVATE_KEY }}
+port: ${{ secrets.DIGITALOCEAN_PORT }}
+script: |
+cd /home/ubuntu/your-project/apps
+git pull origin main
+cat > .env << EOF
+LIST_YOUR_ENV_KEYS: ${{ secrets.GET_THE_SET_VALUES_IN_GITHUB_SECRET }}
+EOF
+chmod 600 .env
+pnpm install
+# pm2 restart your-agent-name or docker-compose down && docker-compose up -d --build
+Deploying Your Agent to Google Cloud RunSection titled “Deploying Your Agent to Google Cloud Run”
+You can deploy your agent to Google Cloud Run using either the Web UI or Command Line.
+Web UI
+Command Line
+Google Cloud Console DeploymentSection titled “Google Cloud Console Deployment”PrerequisitesGoogle Cloud Account (with billing enabled)Project in GCP (or create new one)Agent Code (Dockerized or supported language)Note: If not containerized, Cloud Run can build from source (Python/Node.js/Go)Access Cloud RunGo to Google Cloud ConsoleSelect your projectNavigation Menu ☰ > Serverless > Cloud RunCreate ServiceClick ”+ CREATE SERVICE”Choose deployment method: Existing container image (if using Docker)Source code (if you want Cloud Run to build the container from your source code ie GitHub/Cloud Source)Configure ServiceName: my-agentRegion: us-central1 (or closest)Authentication: Allow unauthenticated if publicContainer: Image URL or source connectionAdvanced (optional): CPU/Memory, Auto-scalingRemember to set theseSet port to be set to 3000Add direct client interface to be used to allow health checksMemory & CPU: Adjust if needed (recommended: 2 CPU, 1-2GB RAM)Environment variables: Define environment variables your agent needs before deploymentScaling: Set minimum and maximum instances (recommended: min. 1)Deploy & TestClick “CREATE” (1-2 minutes)Access Service URL (https://my-agent-xyz.a.run.app)Test: Terminal windowcurl https://my-agent-xyz.a.run.app
+gcloud CLI DeploymentSection titled “gcloud CLI Deployment”PrerequisitesInstall gcloud CLIAuthenticate: Terminal windowgcloud auth logingcloud config set project PROJECT_IDDeploy from ContainerTerminal windowgcloud run deploy my-agent \
+--image=gcr.io/PROJECT_ID/agent-image:latest \
+--platform=managed \
+--region=us-central1 \
+--allow-unauthenticatedDeploy from SourceTerminal windowgcloud run deploy my-agent \
+--source . \
+--platform=managed \
+--region=us-central1Test DeploymentTerminal windowSERVICE_URL=$(gcloud run services describe my-agent \
+--region=us-central1 \
+--format="value(status.url)")
+curl $SERVICE_URLManage ServiceTerminal window# Update deploymentgcloud run deploy my-agent --image=NEW_IMAGE
+# View logsgcloud logging read "resource.type=cloud_run_revision"
+# Delete servicegcloud run services delete my-agent
+Post-DeploymentSection titled “Post-Deployment”
+MonitoringLogs: Cloud Console > Logging > Cloud RunMetrics: Monitoring > Cloud Run DashboardNext StepsSet up CI/CD with Cloud BuildConfigure custom domainsAdd event triggers (Pub/Sub, Storage)
+For more complex configurations, refer to the: Google Cloud Run documentation
+
+================================================================================
+
+================================================================================
+TITLE: Example Agents | Brain Framework
+URL: https://brain.iqai.com/getting-started/example-agents
+================================================================================
+
+Example Agents
+The below are some of the example agents built using Brain Framework from the
+examples repository
+. These AI Agents are designed to demonstrate the capabilities of available plugins and provide inspiration for building your own AI Agents.
+Available Example AgentsSection titled “Available Example Agents”
+⚡ ATP agent
+The ATP Agent uses heartbeat plugin to check top agents daily and buy tokens using 1% of his IQ holdings on fraxtal
+🤖 AMM Near Agent
+The AMM Near Agent is a specialized AI agent that facilitates trading between two assets on the NEAR Protocol. It works with the AMM Near Contract to provide automated price calculations for token swaps.
+💰 Fraxlend agent
+The FraxLend Agent Example allows your agent to check his positions every 24hrs and decide to withdraw and lend if APR of new pools are > 3% of his current positions on fraxtal then post on telegram
+🎨 ImageLoad agent
+The ImageLoad Agent integrates multiple plugins to enable your agent generate images and captions, and post them on a daily basis.
+🔄 OdosBAMM agent
+This agent combines the capabilities of the Odos, BAMM, Sequencer, and Telegram/Discord plugins to facilitate token swaps, borrowing, lending, and complex multi-step operations.
+🧑‍💻 Code Runner agent
+The Code Runner Agent can execute code from JS, python, and other languages directly within the agent's environment.
+🌐 MCP agent
+The MCP Agent leverages the Model Context Protocol (MCP) to connect with MCP servers such as cryo-mcp, providing a flexible interface for interacting with various data sources and services
+
+================================================================================
+
+================================================================================
+TITLE: Plugins | Brain Framework
+URL: https://brain.iqai.com/plugins/overview
+================================================================================
+
+Plugins
+Brain Framework’s plugin system allows you to extend your agent’s capabilities with various integrations. Each plugin adds specific functionality, such as DeFi operations, token swaps, or other blockchain interactions.
+Utility PluginsSection titled “Utility Plugins”
+Heartbeat Plugin
+Schedule automated messages and social media posts with support for multiple concurrent schedules
+Sequencer Plugin
+Chain multiple actions from a single user query with state management between operations
+MCP Plugin
+Mediate communication between Brain Framework and external MCP servers
+Wallet Plugin
+Interact with blockchain wallets to fetch holdings and transaction history across multiple chains
+DeFi PluginsSection titled “DeFi Plugins”
+FraxLend Plugin
+Enable lending and borrowing operations on Fraxtal network
+Odos Plugin
+Execute optimized token swaps with quote retrieval
+ATP Plugin
+Interact with IQ's Agent Tokenization Platform for buying, selling, and managing tokens
+BAMM Plugin
+Enable borrowing and lending operations on Frax BAMM pools
+Using PluginsSection titled “Using Plugins”
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import { createFraxlendPlugin } from "@iqai/plugin-fraxlend";import { createOdosPlugin } from "@iqai/plugin-odos";import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";import { fraxtal } from "viem/chains";
+async function main() {
+const fraxlendPlugin = await createFraxlendPlugin({
+chain: fraxtal,
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+});
+const odosPlugin = await createOdosPlugin({
+chain: fraxtal,
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+});
+const agent = new AgentBuilder()
+.withClient(DirectClient)
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withPlugin(bootstrapPlugin)
+.withPlugin(fraxlendPlugin)
+.withPlugin(odosPlugin)
+.build();
+await agent.start();}
+main().catch(console.error);
+Security Warning
+Never commit sensitive information like API keys, private keys, or environment variables. In particular, your wallet private key requires extra caution as anyone with access can control your funds. Make sure to:
+Add .env to your .gitignore file
+Keep all sensitive credentials and API keys secure and never share them
+Never commit or share your private keys under any circumstances
+Use dedicated development credentials and wallets with limited access/funds
+Regularly rotate API keys and credentials following security best practices
+Using elizaOS pluginsSection titled “Using elizaOS plugins”
+Browse the full collection of community plugins at
+ElizaOS Plugins
+, including:
+Additional client interfaces
+Data storage solutions
+Integration tools
+Utility plugins
+This compatibility ensures you have access to a wide range of tools while building your agents.
+
+================================================================================
+
+================================================================================
+TITLE: ABI Plugin | Brain Framework
+URL: https://brain.iqai.com/plugins/abi
+================================================================================
+
+ABI Plugin
+The ABI plugin provides a dynamic way to interact with any Ethereum-compatible smart contract by generating actions from the contract’s Application Binary Interface (ABI). This plugin automatically creates callable actions for both read and write functions defined in the ABI.
+InstallationSection titled “Installation”
+Install the required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/plugin-abi
+Terminal windowpnpm add @iqai/plugin-abi
+Terminal windowyarn add @iqai/plugin-abi
+Create a .env file with required configuration:
+WALLET_PRIVATE_KEY=your-wallet-private-key
+Basic SetupSection titled “Basic Setup”
+Here’s how to set up an agent with the ABI plugin:
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import { createAbiPlugin } from "@iqai/plugin-abi";import YourABI from "yourABI";import { fraxtal } from "viem/chains";
+async function main() {
+// Initialize ABI plugin
+const abiPlugin = await createAbiPlugin({
+abi: YourABI,
+contractName: "name-of-contract",
+contractAddress: "address-of-contract",
+description: "description-of-contract",
+privateKey: process.env.WALLET_PRIVATE_KEY,
+chain: fraxtal, // Optional, defaults to Fraxtal chain
+});
+// Create agent with plugin
+const agent = new AgentBuilder()
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withPlugin(abiPlugin)
+.build();
+await agent.start();}
+main().catch(console.error);
+How It WorksSection titled “How It Works”
+The ABI plugin works by:
+Analyzing the provided contract ABI
+Extracting function definitions (both read and write)
+Generating corresponding actions for each function
+Automatically handling parameter parsing and response formatting
+Available OperationsSection titled “Available Operations”
+The plugin dynamically creates actions based on the ABI functions provided. Each function in the ABI is transformed into an action with the naming pattern CONTRACT_NAME_FUNCTION_NAME.
+Example ERC20 ActionsSection titled “Example ERC20 Actions”
+When using the plugin with an ERC20 contract, the following actions would be automatically created:
+Action NameDescriptionFunction TypeERC20_BALANCE_OFCheck token balanceRead functionERC20_TRANSFERTransfer tokensWrite functionERC20_APPROVEApprove token spendingWrite functionERC20_TRANSFER_FROMTransfer tokens from another addressWrite functionERC20_ALLOWANCECheck spending allowanceRead functionERC20_TOTAL_SUPPLYGet total token supplyRead function
+Usage ExamplesSection titled “Usage Examples”
+Here’s how to interact with your ABI-enabled agent:
+Querying Token BalanceSection titled “Querying Token Balance”
+Query:
+What's the balance of 0x1234...5678?
+The agent will parse this query, identify the address, and call the appropriate contract function (balanceOf).
+Response:
+✅ Successfully called balanceOf
+Result: "1000000000000000000"
+Transferring TokensSection titled “Transferring Tokens”
+Query:
+Transfer 10 tokens to 0x1234...5678
+The agent will parse this query, extract the amount and recipient address, and execute the transfer function.
+Response:
+✅ Successfully executed transfer
+Transaction hash: 0x123abc...
+You can view this transaction on the blockchain explorer.
+Configuration OptionsSection titled “Configuration Options”
+The ABI plugin accepts these configuration parameters:
+interface AbiPluginOptions {
+abi: any[];
+// Smart contract ABI
+contractName: string;
+// Name for the contract (used in action names)
+contractAddress: `0x${string}`;
+// Contract address
+description: string;
+// Description for the plugin
+privateKey: string;
+// Private key for transactions
+chain?: Chain;
+// Optional: blockchain network (defaults to Fraxtal)}
+Error HandlingSection titled “Error Handling”
+The plugin handles various error scenarios:
+Invalid function arguments
+❌ Error parsing arguments: Expected number, got string
+Transaction execution failures
+❌ Error with transfer: execution reverted: ERC20: transfer amount exceeds balance
+Network connection issues
+❌ Error with balanceOf: network connection failed
+Best PracticesSection titled “Best Practices”
+Store private keys securely: Never hardcode private keys in your application code. Always use environment variables.
+Use proper error handling: Implement try/catch blocks around plugin initialization and usage.
+Test with testnets first: Before using the plugin with mainnet contracts, test thoroughly on testnet networks.
+Validate ABIs: Ensure that the ABI you provide is valid and complete.
+Handle gas efficiently: For write functions, be aware of gas costs and implement proper error handling for insufficient gas scenarios.
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Invalid ABI Format: Ensure your ABI is correctly formatted JSON
+Contract Address Format: The contract address must be a valid Ethereum address starting with “0x”
+Function Not Found: Verify that the function you’re trying to call exists in the ABI
+Transaction Failures: Check for sufficient balance and proper permissions
+Note
+The ABI plugin is compatible with any Ethereum Virtual Machine (EVM) compatible blockchain that works with the viem library, including Ethereum, Fraxtal, Arbitrum, Optimism, Polygon, and more.
+
+================================================================================
+
+================================================================================
+TITLE: Plugin NEAR | Brain Framework
+URL: https://brain.iqai.com/plugins/near
+================================================================================
+
+Plugin NEAR
+The NEAR Plugin provides a seamless integration with the NEAR Protocol blockchain, enabling smart contract interactions, transaction handling, and event listening capabilities directly from your agent.
+InstallationSection titled “Installation”
+Install the plugin using your preferred package manager:
+Terminal windowpnpm add @iqai/plugin-near
+UsageSection titled “Usage”
+Initialize and configure the NEAR plugin in your agent setup:
+import createNearPlugin from "@iqai/plugin-near";import { AgentBuilder } from "@iqai/agent";
+// Initialize the pluginconst nearPlugin = await createNearPlugin({
+accountId: process.env.NEAR_ACCOUNT_ID,
+accountKey: process.env.NEAR_PRIVATE_KEY,
+listeners: [
+{
+eventName: "run_agent",
+contractId: "your-contract.testnet",
+responseMethodName: "agent_response",
+handler: async (payload, { account }) => {
+// Custom event handling logic
+return "result";
+},
+}
+],
+networkConfig: {
+networkId: "testnet", // or "mainnet"
+nodeUrl: "https://test.rpc.fastnear.com",
+},});
+// Add the plugin to your agentconst agent = new AgentBuilder()
+// other configurations
+.withPlugin(nearPlugin)
+.build();
+ConfigurationSection titled “Configuration”
+The plugin requires the following environment variables:
+Variable NameDescriptionNEAR_ACCOUNT_IDYour NEAR account ID for authenticationNEAR_PRIVATE_KEYPrivate key for your NEAR account
+Configuration OptionsSection titled “Configuration Options”
+Below are all available configuration options for the NEAR plugin:
+OptionTypeRequiredDescriptionaccountIdstringYesYour NEAR account ID for authenticationaccountKeystringYesPrivate key for your NEAR accountlistenersArrayYesArray of event listener configurations (see Event Listener Options table)gasLimitstringNoDefault gas limit for transactionsnetworkConfig.networkIdstringNoNetwork ID (“testnet” or “mainnet”)networkConfig.nodeUrlstringNoNEAR RPC endpoint URL
+Event Listener OptionsSection titled “Event Listener Options”
+Each event listener in the listeners array accepts the following options:
+OptionTypeRequiredDescriptioneventNamestringYesName of the event to listen forcontractIdstringYesContract ID that emits the eventhandlerFunctionYesFunction that processes the event and returns a responseresponseMethodNamestringNoContract method to call with the responsecronExpressionstringNoOptional cron schedule for timed events
+Handler ContextSection titled “Handler Context”
+The handler function receives two parameters:
+ParameterTypeDescriptionpayloadanyEvent data from the smart contractcontextObjectContext object containing the NEAR accountcontext.accountAccountNEAR account instance for making calls to contracts
+Event-Driven AI Agents on NEARSection titled “Event-Driven AI Agents on NEAR”
+This plugin enables a powerful workflow for implementing AI agents that interact with NEAR blockchain smart contracts:
+Event Trigger: A blockchain transaction triggers an event on a smart contract and pauses, waiting for input from an AI agent
+Agent Monitoring: Your AI agent, powered by this plugin, monitors the blockchain for these specific events
+Computation: When an event is detected, the agent performs AI-driven computations or analysis based on the event data
+Response Transaction: The agent submits the result back to the blockchain via a transaction
+Contract Resumption: The original smart contract receives the AI agent’s response and continues its execution with this new data
+This event-driven architecture enables “AI in the loop” systems where blockchain operations can incorporate intelligent decision-making at specific points in their execution.
+Inside your handler functions, you can:
+Parse the incoming data
+Run AI inference or complex computations
+Call other NEAR contracts to gather additional data
+Return a result that will be automatically sent back to the original contract
+Use CasesSection titled “Use Cases”
+The NEAR Plugin enables numerous use cases for AI integration with blockchain:
+Decentralized Finance (DeFi): Price predictions, risk analysis, optimal trading paths
+Gaming: Intelligent NPCs, procedural content generation, dynamic difficulty adjustment
+Content Creation: On-chain verification of AI-generated assets or content
+Governance: Analysis of proposals and voting recommendations
+Data Markets: AI-powered data validation and enrichment services
+Error HandlingSection titled “Error Handling”
+When implementing event handlers, proper error handling is essential:
+try {
+// Your event processing logic
+const result = processData(payload);
+return result;} catch (error) {
+console.error("Agent processing failed:", error.message);
+// Return a fallback value or rethrow depending on your requirements}
+Best PracticesSection titled “Best Practices”
+Store your NEAR account ID and private key securely in environment variables
+Implement comprehensive input validation in your event handlers
+Design handlers to be idempotent when possible
+Add timeout handling for long-running event processor functions
+Log all events and responses for debugging purposes
+Test your agent thoroughly on testnet before deploying to mainnet
+Consider gas costs for response transactions in your design
+Implement circuit breakers to pause event handling if errors exceed thresholds
+ConclusionSection titled “Conclusion”
+The NEAR Plugin enables your agent to interact seamlessly with the NEAR blockchain, creating responsive AI agents that can participate in on-chain activities. This “AI in the loop” architecture opens up possibilities for building increasingly intelligent and responsive decentralized applications.
+
+================================================================================
+
+================================================================================
+TITLE: FraxLend Plugin | Brain Framework
+URL: https://brain.iqai.com/plugins/fraxlend
+================================================================================
+
+FraxLend Plugin
+The FraxLend plugin enables your agent to interact with FraxLend protocol, providing comprehensive lending and borrowing capabilities. It supports various operations including lending, borrowing, withdrawing, and managing collateral on the Fraxtal network.
+InstallationSection titled “Installation”
+Install the required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/plugin-fraxlend
+Terminal windowpnpm add @iqai/plugin-fraxlend
+Terminal windowyarn add @iqai/plugin-fraxlend
+Create a .env file with required configuration:
+WALLET_PRIVATE_KEY=your-wallet-private-keyOPENAI_API_KEY=your-openai-api-key
+Basic SetupSection titled “Basic Setup”
+Here’s a complete example of setting up an agent with the FraxLend plugin:
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import { createFraxlendPlugin } from "@iqai/plugin-fraxlend";import { fraxtal } from "viem/chains";
+async function main() {
+// Initialize FraxLend plugin
+const fraxlendPlugin = await createFraxlendPlugin({
+chain: fraxtal,
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+});
+// Create agent with plugin
+const agent = new AgentBuilder()
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withPlugin(fraxlendPlugin)
+.build();
+await agent.start();}
+main().catch(console.error);
+Available OperationsSection titled “Available Operations”
+The plugin provides the following operations:
+Lending Management
+Deposit assets
+Withdraw assets
+Borrowing Operations
+Borrow assets
+Repay borrowed amounts
+Collateral Management
+Add collateral
+Remove collateral
+Information Retrieval
+Get lending statistics
+View agent positions
+Find pair addresses
+Usage ExamplesSection titled “Usage Examples”
+Here’s how to interact with your FraxLend-enabled agent through natural language:
+Finding Pair AddressesSection titled “Finding Pair Addresses”
+Query:
+What's the pair address for FRAX-ETH pool with the highest APR?
+The agent will process this to:
+{
+"assetSymbol": "FRAX",
+"collateralSymbol": "ETH",
+"sortByApr": "highest"}
+Lending AssetsSection titled “Lending Assets”
+Query:
+I want to lend 100 FRAX to the FRAX-ETH pool at 0x123...abc
+Agent processes this as:
+{
+"pairAddress": "0x123...abc",
+"amount": "100000000000000000000"}
+BorrowingSection titled “Borrowing”
+Query:
+Borrow 1000 FRAX using 2 ETH as collateral from the pool at 0x123...abc
+Agent structures this as:
+{
+"pairAddress": "0x123...abc",
+"borrowAmount": "1000000000000000000000",
+"collateralAmount": "2000000000000000000",
+"receiver": "0x456...def"}
+Checking PositionsSection titled “Checking Positions”
+Query:
+Show my current FraxLend positions
+Configuration OptionsSection titled “Configuration Options”
+The FraxLend plugin accepts these configuration parameters:
+interface FraxLendPluginConfig {
+chain: Chain;
+// Blockchain network configuration
+walletPrivateKey: string;
+// Private key for transactions}
+Error HandlingSection titled “Error Handling”
+Always implement proper error handling when using the plugin:
+try {
+const fraxlendPlugin = await createFraxlendPlugin({
+chain: fraxtal,
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+});} catch (error) {
+console.error('Failed to initialize FraxLend plugin:', error);}
+Best PracticesSection titled “Best Practices”
+Environment Variables: Always use environment variables for sensitive information like private keys
+Transaction Validation: Double-check amounts and addresses before confirming transactions
+Error Handling: Implement proper error handling for all operations
+Gas Management: Consider gas costs for operations on the Fraxtal network
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Invalid Pair Address: Ensure you’re using the correct pair address for the pool
+Insufficient Balance: Verify you have enough tokens for the operation
+Transaction Failures: Check gas settings and network status
+
+================================================================================
+
+================================================================================
+TITLE: Odos Plugin | Brain Framework
+URL: https://brain.iqai.com/plugins/odos
+================================================================================
+
+Odos Plugin
+The Odos plugin enables your agent to perform token swaps and exchanges using the Odos protocol. It provides optimized routing for token exchanges with competitive rates.
+InstallationSection titled “Installation”
+Install the required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/plugin-odos
+Terminal windowpnpm add @iqai/plugin-odos
+Terminal windowyarn add @iqai/plugin-odos
+Create a .env file with required configuration:
+WALLET_PRIVATE_KEY=your-wallet-private-keyOPENAI_API_KEY=your-openai-api-key
+Basic SetupSection titled “Basic Setup”
+Here’s how to set up an agent with the Odos plugin:
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import { createOdosPlugin } from "@iqai/plugin-odos";import { fraxtal } from "viem/chains";
+async function main() {
+// Initialize Odos plugin
+const odosPlugin = await createOdosPlugin({
+chain: fraxtal,
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+});
+// Create agent with plugin
+const agent = new AgentBuilder()
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withPlugin(odosPlugin)
+.build();
+await agent.start();}
+main().catch(console.error);
+Available OperationsSection titled “Available Operations”
+The plugin provides the following operations:
+Token swaps between any supported tokens
+Quote retrieval for swap rates
+Usage ExamplesSection titled “Usage Examples”
+Here’s how to interact with your Odos-enabled agent:
+Getting a QuoteSection titled “Getting a Quote”
+Query:
+Get me a quote for swapping 1 wfrxEth to FRAX on Fraxtal
+The agent will process this to:
+{
+"fromToken": "0x...[wfrxEth address]",
+"toToken": "0x...[FRAX address]",
+"chain": "252",
+"amount": "1000000000000000000"}
+Performing a SwapSection titled “Performing a Swap”
+Query:
+Swap 100 DAI to FXS
+The agent will structure this as:
+{
+"fromToken": "0x...[DAI address]",
+"toToken": "0x...[FXS address]",
+"chain": "252",
+"amount": "100000000"}
+Configuration OptionsSection titled “Configuration Options”
+The Odos plugin accepts these configuration parameters:
+interface OdosActionParams {
+chain: Chain;
+// Blockchain network configuration
+walletPrivateKey: string;
+// Private key for transactions}
+Error HandlingSection titled “Error Handling”
+Implement proper error handling when using the plugin:
+try {
+const odosPlugin = await createOdosPlugin({
+chain: fraxtal,
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+});} catch (error) {
+console.error('Failed to initialize Odos plugin:', error);}
+Best PracticesSection titled “Best Practices”
+Amount Verification: Double-check token amounts and decimals
+Token Approval: Ensure proper token approvals before swaps
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Insufficient Balance: Ensure you have enough tokens for the swap
+Token Approval: Check if tokens are approved for swapping
+Network Congestion: Consider retry mechanisms during high network activity
+Note
+Token availability may vary based on network liquidity and market conditions
+
+================================================================================
+
+================================================================================
+TITLE: Wiki Plugin | Brain Framework
+URL: https://brain.iqai.com/plugins/wiki
+================================================================================
+
+Wiki Plugin
+The Wiki Plugin enables your agent to retrieve blockchain knowledge from IQ.Wiki
+InstallationSection titled “Installation”
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/agent @iqai/plugin-wiki
+Terminal windowpnpm add @iqai/agent @iqai/plugin-wiki
+Terminal windowyarn add @iqai/agent @iqai/plugin-wiki
+Basic SetupSection titled “Basic Setup”
+Here’s a complete example of setting up an agent with the Wiki plugin:
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import { createWikiPlugin } from "@iqai/plugin-wiki";
+async function main() {
+// Initialize Wiki plugin
+const wikiPlugin = await createWikiPlugin();
+// Create agent with plugin
+const agent = new AgentBuilder()
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withPlugin(wikiPlugin)
+.build();
+await agent.start();}
+main().catch(console.error);
+Available OperationsSection titled “Available Operations”
+Wiki Retrieval: Get specific wiki articles by ID
+User Created Wikis: Get wikis created by a specific user
+User Edited Wikis: Get wikis edited by a specific user
+User Wiki Activities: Get all wiki activities (both creations and edits) by a specific user
+Time-Filtered Activities: Filter any of the above operations by time range
+Usage ExamplesSection titled “Usage Examples”
+OperationExample QueryGet WikiShow me the wiki for bitcoinUser Created WikisShow wikis created by user 0x8AF7a19a26d8FBC48dEfB35AEfb15Ec8c407f889User Edited WikisShow edited wikis by user 0x8AF7a19a26d8FBC48dEfB35AEfb15Ec8c407f889User Wiki ActivitiesShow me wiki activities for 0x8AF7a19a26d8FBC48dEfB35AEfb15Ec8c407f889Time-Filtered ActivitiesShow wiki activities for 0x8AF7a19a26d8FBC48dEfB35AEfb15Ec8c407f889 in last 24 hours
+Getting a wikiSection titled “Getting a wiki”
+Query:
+Get me wiki on ai meme hub
+The agent will process this to:
+{
+"id": "ai-meme-hub",}
+Response will be formatted as:
+📜 Wiki Details- Title: AI Meme Hub- Summary: AI Meme Hub is a decentralized platform for creating and sharing AI-generated memes...
+🔗 Source: https://iq.wiki/ai-meme-hub🔗 Transaction: https://polygonscan.com/tx/0x123...
+Getting user created wikisSection titled “Getting user created wikis”
+Query:
+Get me wikis created by 0x9130241234123434
+The agent will process this to:
+{
+"id": "0x9130241234123434"}
+Response will be formatted as:
+📜 Wiki Created- Title: Ethereum- Summary: Ethereum is a decentralized platform...- Created: 5/5/2023, 11:03:26 PM
+🔗 Source: https://iq.wiki/ethereum🔗 Transaction: https://polygonscan.com/tx/0x456...
+📜 Wiki Created- Title: Solana- Summary: Solana is a high-performance blockchain...- Created: 5/4/2023, 10:15:42 AM
+🔗 Source: https://iq.wiki/solana🔗 Transaction: https://polygonscan.com/tx/0x789...
+Getting user edited wikisSection titled “Getting user edited wikis”
+Query:
+Show me edited wikis by 0x9130241234123434
+The agent will process this to:
+{
+"id": "0x9130241234123434"}
+Response will be formatted as:
+📜 Wiki Edited- Title: Bitcoin- Summary: Bitcoin is a decentralized digital currency...- Edited: 5/6/2023, 1:26:58 AM- Changes: 52 words (21.36%)- Modified sections: content, tags
+🔗 Source: https://iq.wiki/revision/0f9ed751-f46a-40f7-af56-a54cc8951754🔗 Transaction: https://polygonscan.com/tx/0xabc...
+Getting user wiki activitiesSection titled “Getting user wiki activities”
+Query:
+Show me wiki activities for 0x9130241234123434
+The agent will process this to:
+{
+"id": "0x9130241234123434"}
+Response will include both creations and edits:
+📜 Wiki Edited- Title: Bitcoin- Summary: Bitcoin is a decentralized digital currency...- Edited: 5/6/2023, 1:26:58 AM- Changes: 52 words (21.36%)- Modified sections: content, tags
+🔗 Source: https://iq.wiki/revision/0f9ed751-f46a-40f7-af56-a54cc8951754🔗 Transaction: https://polygonscan.com/tx/0xabc...
+📜 Wiki Created- Title: Ethereum- Summary: Ethereum is a decentralized platform...- Created: 5/5/2023, 11:03:26 PM
+🔗 Source: https://iq.wiki/ethereum🔗 Transaction: https://polygonscan.com/tx/0x456...
+Getting time-filtered user activitiesSection titled “Getting time-filtered user activities”
+Query:
+Get me wiki activities by 0x9130241234123434 in last 24 hours
+The agent will process this to:
+{
+"id": "0x9130241234123434",
+"timeFrameSeconds": 86400}
+Error HandlingSection titled “Error Handling”
+Always implement proper error handling when using the plugin:
+try {
+const wikiPlugin = await createWikiPlugin();
+} catch (error) {
+console.error('Failed to initialize Wiki plugin:', error);
+}
+Best PracticesSection titled “Best Practices”
+ID Validation: Ensure wiki IDs are correctly formatted
+User Address Format: Use complete Ethereum addresses
+Time Filtering: Specify clear time periods for filtered results
+Error Handling: Implement robust error handling for all operations
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Wiki Not Found: Verify the wiki ID exists on IQ.Wiki
+User Not Found: Ensure the Ethereum address is correct
+No Recent Activities: The user may not have any wiki activities in the specified time period
+API Connection: Check your network connection if requests fail
+
+================================================================================
+
+================================================================================
+TITLE: ATP Plugin | Brain Framework
+URL: https://brain.iqai.com/plugins/atp
+================================================================================
+
+ATP Plugin
+The ATP Plugin enables your agent to interact with IQ’s Agent Tokenization Platform. It provides functionality for:
+Buying, selling, and managing AI agent tokens using IQ as the base currency
+Viewing agent performance metrics and token statistics
+Managing token holdings and checking position values
+Viewing and adding agent logs for activity tracking
+InstallationSection titled “Installation”
+Install the required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/agent @iqai/plugin-atp
+Terminal windowpnpm add @iqai/agent @iqai/plugin-atp
+Terminal windowyarn add @iqai/agent @iqai/plugin-atp
+Create a .env file with the required configuration:
+Terminal windowWALLET_PRIVATE_KEY=your-wallet-private-keyAPI_KEY=your-api-key # Optional - required only for adding logs
+Basic SetupSection titled “Basic Setup”
+Here’s a complete example of setting up an agent with the ATP plugin:
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import { createAtpPlugin } from "@iqai/plugin-atp";
+async function main() {
+// Initialize ATP plugin const atpPlugin = await createAtpPlugin({
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+apiKey: process.env.ATP_API_KEY, // Optional - required only for adding logs
+});
+// Create agent with plugin
+const agent = new AgentBuilder()
+.withClient(DirectClient)
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withPlugin(bootstrapPlugin)
+.withPlugin(atpPlugin)
+.build();
+await agent.start();}
+main().catch(console.error);
+Available OperationsSection titled “Available Operations”
+Agent Statistics: View performance metrics and token statistics
+Portfolio Management: Monitor holdings and position values
+Trading Operations: Buy/sell agent tokens using IQ
+Agents list: View a list of available agents
+Agent Logs: View and add activity logs for agents
+Usage ExamplesSection titled “Usage Examples”
+OperationExample QueryCheck StatsShow me stats for agent 0x1234...5678View PortfolioShow my ATP holdingsBuy TokensBuy 1000 IQ worth of agent 0x1234...5678Sell TokensSell 50 tokens of agent 0x1234...5678List AgentsShow me top agents on atpView LogsShow logs for agent 0x1234...5678Add LogAdd log for agent 0x1234...5678: Weekly yield distribution complete
+Configuration OptionsSection titled “Configuration Options”
+The ATP plugin accepts the following configuration parameters:
+interface ATPPluginConfig {
+walletPrivateKey: string;
+// Private key for transactions
+apiKey?: string;
+// API key for adding logs (optional)}
+Error HandlingSection titled “Error Handling”
+Always implement proper error handling when using the plugin:
+try {
+const atpPlugin = await createAtpPlugin({
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+apiKey: process.env.API_KEY,
+});} catch (error) {
+console.error('Failed to initialize ATP plugin:', error);}
+Best PracticesSection titled “Best Practices”
+Token Validation: Verify agent addresses before transactions
+Amount Verification: Double-check token amounts and IQ values
+Transaction Monitoring: Track transaction status and confirmations
+Balance Management: Ensure sufficient IQ balance for purchases
+Log Management: Keep logs concise and informative for better tracking
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Invalid Agent Address: Ensure you’re using the correct agent token contract address
+Insufficient IQ Balance: Verify you have enough IQ tokens for purchases
+Transaction Failures: Check transaction parameters and network status
+Token Approval: Ensure proper token approvals before selling
+Missing API Key: An API key is required for adding logs (but not for viewing them)
+
+================================================================================
+
+================================================================================
+TITLE: BAMM Plugin | Brain Framework
+URL: https://brain.iqai.com/plugins/bamm
+================================================================================
+
+BAMM Plugin
+The BAMM Plugin enables you to interact with BAMM, a decentralized platform for borrowing, lending, and managing liquidity positions in Fraxswap-style pools.
+InstallationSection titled “Installation”
+Install the required package:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/plugin-bamm
+Terminal windowpnpm add @iqai/plugin-bamm
+Terminal windowyarn add @iqai/plugin-bamm
+Create a .env file with the following environment variable:
+Terminal windowWALLET_PRIVATE_KEY=your-wallet-private-key
+Basic SetupSection titled “Basic Setup”
+Here’s how to initialize and use the BAMM plugin:
+import { createBAMMPlugin } from '@iqai/plugin-bamm';import { fraxtal } from 'viem/chains';
+async function main() {
+// Initialize BAMM plugin
+const bammPlugin = await createBAMMPlugin({
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+chain: fraxtal,
+});
+// Now the plugin is ready to use}
+Available OperationsSection titled “Available Operations”
+The BAMM plugin allows the following operations:
+BAMM_BORROW: Borrow assets from BAMM pools using collateral.
+BAMM_LEND: Lend assets to BAMM pools.
+BAMM_ADD_COLLATERAL: Add collateral to your BAMM position.
+BAMM_REMOVE_COLLATERAL: Remove collateral from your BAMM position.
+BAMM_REPAY: Repay borrowed assets to a BAMM pool.
+BAMM_WITHDRAW: Withdraw LP tokens by redeeming BAMM tokens.
+BAMM_GET_POSITIONS: View current positions in BAMM pools.
+BAMM_GET_POOL_STATS: Get statistics for all BAMM pools.
+Usage ExamplesSection titled “Usage Examples”
+Note
+Either token address or token symbol can be provided in the query. Only the bamm address is must
+OperationExample QueryBorrow tokensborrow 10k of CABU from this 0xC5B225cF058915BF28D7d9DFA3043BD53C63Ea84 bammLend LP tokenslend 10k lp tokens to 0xC5B225cF058915BF28D7d9DFA3043BD53C63Ea84 bammAdd collateraladd 100k collateral of 0xCc3023635dF54FC0e43F47bc4BeB90c3d1fbDa9f to this 0xC5B225cF058915BF28D7d9DFA3043BD53C63Ea84 bammRemove collateralremove 10k collateral of IQT from this 0xC5B225cF058915BF28D7d9DFA3043BD53C63Ea84 bammRepay borrowed tokensrepay 10k of CABU to this 0xC5B225cF058915BF28D7d9DFA3043BD53C63Ea84 bammWithdraw LP tokenswithdraw 10k bamm tokens from this 0xC5B225cF058915BF28D7d9DFA3043BD53C63Ea84 bammGet your positionsMy Bamm postionsGet available bamm poolsAll bamm pools
+Configuration OptionsSection titled “Configuration Options”
+The plugin requires the following configuration options:
+interface BAMMActionParams {
+chain: Chain;
+// Blockchain network configuration
+walletPrivateKey: string;
+// Private key for transactions}
+Error HandlingSection titled “Error Handling”
+Handle errors gracefully by wrapping the plugin actions in try/catch blocks:
+try {
+const bammPlugin = await createBAMMPlugin({
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+chain: fraxtal,
+});} catch (error) {
+console.error('Failed to initialize BAMM plugin:', error);}
+Best PracticesSection titled “Best Practices”
+Security: Never expose your wallet private key.
+Amount Verification: Always verify the amounts and token addresses before interacting with the plugin.
+Rate Limits: Be mindful of rate limits and avoid excessive transactions in a short period.
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Insufficient Balance: Ensure that your wallet has enough balance to perform the requested operations.
+Transaction Failure: Confirm that the pool address is valid and your collateral is sufficient.
+Network Issues: Ensure you have a stable connection to the blockchain network.
+Token Approval: Check if the required tokens are approved for lending or borrowing.
+
+================================================================================
+
+================================================================================
+TITLE: Heartbeat Plugin | Brain Framework
+URL: https://brain.iqai.com/plugins/heartbeat
+================================================================================
+
+Heartbeat Plugin
+The Heartbeat Plugin enables automated scheduling of tasks and social media interactions. It provides functionality for:
+Scheduling periodic messages using cron-based timing
+Posting to social media platforms like Twitter and Telegram
+Maintaining continuous agent interactions
+Supporting multiple concurrent schedules
+InstallationSection titled “Installation”
+Install the required package:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/plugin-heartbeat
+Terminal windowpnpm add @iqai/plugin-heartbeat
+Terminal windowyarn add @iqai/plugin-heartbeat
+Create a .env file with platform-specific configurations as needed:
+Terminal windowTELEGRAM_CHAT_ID=your-chat-id
+Basic SetupSection titled “Basic Setup”
+Here’s a complete example of setting up an agent with the Heartbeat plugin:
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import { createHeartbeatPlugin } from "@iqai/plugin-heartbeat";
+async function main() {
+// Initialize Heartbeat plugin
+const heartbeatPlugin = await createHeartbeatPlugin([
+{
+period: "*/30 * * * * *",
+// Every 30 seconds
+input: "Post a crypto market update",
+clients: [
+{
+type: "telegram",
+chatId: process.env.TELEGRAM_CHAT_ID as string
+}
+]
+}
+]);
+// Create agent with plugin
+const agent = new AgentBuilder()
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withPlugin(heartbeatPlugin)
+.build();
+await agent.start();}main().catch(console.error);
+⚙ ConfigurationSection titled “⚙ Configuration”
+The plugin requires configuration for clients. Currently heartbeat plugin supports Twitter, Telegram, and callback functions.
+🔧 Platform📜 Configuration NeededTwitter{ type: "twitter" }Telegram{ type: "telegram", chatId: string }Callback{ type: "callback", callback: (content: string, roomId: string) => Promise<void> }
+Usage ExamplesSection titled “Usage Examples”
+Telegram UpdatesSection titled “Telegram Updates”
+{
+"period": "*/30 * * * * *",
+// Every 30 seconds
+"input": "Post a crypto joke",
+"clients": [
+{
+"type": "telegram",
+"chatId": "-1234567890"
+}
+]}
+Hourly Twitter PostsSection titled “Hourly Twitter Posts”
+{
+"period": "0 */1 * * *",
+// Every hour
+"input": "Market update post",
+"clients": [
+{
+"type": "twitter"
+}
+]}
+Daily News SummarySection titled “Daily News Summary”
+{
+"period": "0 0 * * *",
+// Once per day at midnight
+"input": "Create a daily crypto news summary",
+"clients": [
+{
+"type": "telegram",
+"chatId": "-1234567890"
+}
+]}
+Custom CallbackSection titled “Custom Callback”
+{
+"period": "*/30 * * * * *",
+// Every 30 seconds
+"input": "Post a crypto market update",
+"clients": [
+{
+"type": "callback",
+"callback": (content, roomId) => console.log(`Message for ${roomId}: ${content}`)
+}
+]}
+Multiple Clients ExampleSection titled “Multiple Clients Example”
+{
+"period": "0 12 * * *",
+// Every day at noon
+"input": "Generate daily market report",
+"clients": [
+{
+"type": "twitter"
+},
+{
+"type": "telegram",
+"chatId": "-1234567890"
+}
+],
+"onlyFinalOutput": true,
+"shouldPost": (response) => response.length > 100,
+"formatResponse": async (response, runtime) => {
+return `📊 DAILY REPORT 📊\n\n${response}`;
+}}
+Best PracticesSection titled “Best Practices”
+Cron Expressions: Use appropriate intervals to avoid rate limiting
+Message Content: Keep prompts clear and specific
+Platform Guidelines: Follow social media posting guidelines
+Error Handling: Implement proper error handling for failed posts
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Invalid Cron Expression: Verify your scheduling syntax
+Missing Configuration: Ensure platform-specific configs are provided
+Rate Limiting: Monitor and adjust posting frequencies
+Network Issues: Implement retry logic for failed requests
+
+================================================================================
+
+================================================================================
+TITLE: Sequencer Plugin | Brain Framework
+URL: https://brain.iqai.com/plugins/sequencer
+================================================================================
+
+Sequencer Plugin
+The Sequencer Plugin enables your agent to execute complex multi-step operations by:
+Coordinating multiple actions in a specific sequence
+Handling state and context across actions
+Providing detailed execution feedback
+InstallationSection titled “Installation”
+Install the required packages:
+Terminal windowpnpm add @iqai/agent @iqai/plugin-sequencer
+Basic SetupSection titled “Basic Setup”
+Here’s a complete example of setting up an agent with the Sequencer plugin:
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import createSequencerPlugin from "@iqai/plugin-sequencer";
+async function main() {
+// Initialize Sequencer plugin
+const sequencerPlugin = await createSequencerPlugin();
+// Create agent with plugin
+const agent = new AgentBuilder()
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withPlugins([sequencerPlugin])
+.build();
+await agent.start();}
+main().catch(console.error);
+Usage ExamplesSection titled “Usage Examples”
+Get my AI token holdings, then sell 10% of the top holding
+Get Fraxlend pool with highest APR, then lend 0.1 FRAX to the pool
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Missing Actions: Ensure all required action plugins are installed
+State Persistence: Verify database configuration
+Sequence Timeouts: Check maxSteps configuration
+
+================================================================================
+
+================================================================================
+TITLE: Bootstrap Plugin | Brain Framework
+URL: https://brain.iqai.com/plugins/bootstrap
+================================================================================
+
+Bootstrap Plugin
+The Bootstrap Plugin provides essential baseline functionality for your agent, including conversation management, room control, and core evaluation capabilities.
+InstallationSection titled “Installation”
+Install the package:
+npm
+pnpm
+yarn
+Terminal windownpm i @eliza/[email protected]
+Terminal windowpnpm add @eliza/[email protected]
+Terminal windowyarn add @eliza/[email protected]
+Import and add to your agent:
+import { createBootstrapPlugin } from "@eliza/plugin-bootstrap";
+const agent = new AgentBuilder()
+.withPlugin(createBootstrapPlugin())
+.build();
+Available FeaturesSection titled “Available Features”
+ActionsSection titled “Actions”
+ActionDescriptionExample UsagecontinueContinue the current conversation flowContinue our previous discussionfollowRoomBegin following a room for updatesFollow room trading-signalsunfollowRoomStop following a roomUnfollow room general-chatignoreIgnore specific messages or patternsIgnore messages from @spambotmuteRoomMute notifications from a roomMute room announcementsunmuteRoomRestore notifications from a roomUnmute room important-alerts
+Usage ExamplesSection titled “Usage Examples”
+// Initialize plugin with default configurationconst bootstrapPlugin = createBootstrapPlugin();
+// Add to agentconst agent = new AgentBuilder()
+.withPlugin(bootstrapPlugin)
+.build();
+Configuration OptionsSection titled “Configuration Options”
+The bootstrap plugin accepts optional configuration parameters:
+interface BootstrapConfig {
+enableBoredom?: boolean;
+// Enable/disable boredom management
+timeFormat?: string;
+// Preferred time format
+factChecking?: boolean;
+// Enable/disable fact checking}
+Best PracticesSection titled “Best Practices”
+Initialize the bootstrap plugin first before other plugins
+Configure fact checking for sensitive operations
+Use room management features to organize conversations
+Implement proper error handling for actions
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Room Not Found: Verify room identifiers before follow/unfollow operations
+Action Timeout: Check network connectivity and retry the action
+Evaluation Errors: Ensure proper context is provided for fact/goal evaluation
+Provider Unavailability: Verify plugin initialization and configuration
+Tip
+The bootstrap plugin is essential for basic agent functionality. It’s recommended to include it in all agent configurations.
+
+================================================================================
+
+================================================================================
+TITLE: Node Plugin | Brain Framework
+URL: https://brain.iqai.com/plugins/node
+================================================================================
+
+Node Plugin
+The Node Plugin provides essential services for web browsing, media processing, and content analysis through Node.js.
+InstallationSection titled “Installation”
+Install the package:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/plugin-node
+Terminal windowpnpm add github:elizaos-plugins/plugin-node
+Terminal windowyarn add github:elizaos-plugins/plugin-node
+UsageSection titled “Usage”
+import { createNodePlugin } from "@eliza/plugin-node";
+const nodePlugin = createNodePlugin();
+const agent = new AgentBuilder()
+.withPlugin(nodePlugin)
+.build();
+Available ServicesSection titled “Available Services”
+ServiceDescriptionKey FeaturesBrowserServiceWeb capabilitiesPage loading, content extraction, screenshotsImageDescriptionServiceImage analysisContent recognition, caption generationLlamaServiceLLM integrationText generation, analysisPdfServicePDF handlingReading, parsing, text extractionSpeechServiceText-to-speechAudio generation, voice synthesisTranscriptionServiceSpeech-to-textAudio transcription, language detectionVideoServiceVideo processingFormat conversion, frame extraction
+ConfigurationSection titled “Configuration”
+interface NodePluginConfig {
+browserOptions?: {
+headless?: boolean;
+timeout?: number;
+};
+speechOptions?: {
+defaultVoice?: string;
+outputFormat?: string;
+};
+videoOptions?: {
+maxDuration?: number;
+outputFormats?: string[];
+};}
+Best PracticesSection titled “Best Practices”
+Handle service errors appropriately
+Implement timeouts for browser operations
+Cache processed media when possible
+Monitor resource usage for media operations
+Tip
+Configure service-specific options based on your performance requirements.
+
+================================================================================
+
+================================================================================
+TITLE: Solana Plugin | Brain Framework
+URL: https://brain.iqai.com/plugins/solana
+================================================================================
+
+Solana Plugin
+The Solana Plugin provides blockchain functionality including wallet management and transaction trust evaluation.
+InstallationSection titled “Installation”
+Install the package:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/plugin-solana
+Terminal windowpnpm add github:elizaos-plugins/plugin-solana
+Terminal windowyarn add github:elizaos-plugins/plugin-solana
+Configure environment:
+Terminal windowSOLANA_PRIVATE_KEY=your-wallet-private-keySOLANA_RPC_URL=your-rpc-endpoint
+UsageSection titled “Usage”
+import { createSolanaPlugin } from "@eliza/plugin-solana";
+const solanaPlugin = createSolanaPlugin({
+privateKey: process.env.SOLANA_PRIVATE_KEY,
+rpcUrl: process.env.SOLANA_RPC_URL});
+const agent = new AgentBuilder()
+.withPlugin(solanaPlugin)
+.build();
+FeaturesSection titled “Features”
+EvaluatorsSection titled “Evaluators”
+EvaluatorDescriptiontrustEvaluatorAssess transaction trust scores
+ProvidersSection titled “Providers”
+ProviderDescriptionwalletProviderWallet management and operationstrustScoreProviderTransaction trust metrics
+ConfigurationSection titled “Configuration”
+interface SolanaPluginConfig {
+privateKey: string;
+rpcUrl: string;
+network?: "mainnet" | "testnet" | "devnet";
+trustScoreThreshold?: number;}
+Best PracticesSection titled “Best Practices”
+Implement proper error handling for transactions
+Validate addresses before operations
+Monitor trust scores for suspicious activity
+Use appropriate network for testing
+
+================================================================================
+
+================================================================================
+TITLE: MCP Plugin | Brain Framework
+URL: https://brain.iqai.com/plugins/mcp
+================================================================================
+
+MCP Plugin
+The MCP Plugin acts as a mediator between the Brain framework and an MCP server. It connects to an MCP server—either locally via stdio or remotely via SSE—retrieves available tools and converts them into actions that the Brain Framework can execute. The actions are generated dynamically based on the MCP server’s capabilities.
+There are two ways to configure the plugin:
+Stdio Mode: For local MCP servers using process-based communication.
+SSE Mode: For remote MCP servers using Server-Sent Events.
+InstallationSection titled “Installation”
+Install the plugin:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/plugin-mcp
+Terminal windowpnpm add @iqai/plugin-mcp
+Terminal windowyarn add @iqai/plugin-mcp
+ConfigurationSection titled “Configuration”
+Configure the plugin with the following parameters:
+Param NameDescriptionRequirednameName of the MCP pluginYesdescriptionDescription of the pluginYestransportTransport configuration object (see below)YeshandleResponseCustom handler for processing tool call resultsNodisableToolChainingDisable automatic tool chaining behaviorNotoolChainingTemplateCustom template for tool chaining promptNo
+Transport ConfigurationSection titled “Transport Configuration”
+Configure the plugin for either stdio or sse modes.
+Stdio ModeSection titled “Stdio Mode”
+Use stdio mode when you want to run a local MCP server as a separate process.
+Param NameDescriptionmodeMust be set to "stdio"commandCommand to run the local MCP server processargsArguments for the local MCP server process (string list)
+SSE ModeSection titled “SSE Mode”
+Use sse mode to connect to a remote MCP server via Server-Sent Events.
+Param NameDescriptionmodeMust be set to "sse"serverUrlThe base URL of the remote MCP serverheadersHeaders to include (if any) in the request to the remote server
+UsageSection titled “Usage”
+Import and initialize the plugin using the createMcpPlugin method.
+For a Local MCP Server (Stdio Mode)Section titled “For a Local MCP Server (Stdio Mode)”
+import { createMcpPlugin } from "@iqai/plugin-mcp";
+// Initialize the plugin with stdio configurationconst pluginFs = await createMcpPlugin({
+name: "file-system",
+description: "File system MCP server",
+transport: {
+mode: "stdio",
+command: "npx",
+args: [
+"-y",
+"@modelcontextprotocol/server-filesystem",
+"/home/user/",
+"/home/user/Desktop",
+],
+}});
+For a Remote MCP Server (SSE Mode)Section titled “For a Remote MCP Server (SSE Mode)”
+import { createMcpPlugin } from "@iqai/plugin-mcp";
+// Initialize the plugin with sse configurationconst plugin = await createMcpPlugin({
+name: "remote-mcp-tools",
+description: "Remote MCP server tools",
+transport: {
+mode: "sse",
+serverUrl: "YOUR_SERVER_URL",
+headers: {}
+}});
+Once initialized, the plugin dynamically generates actions based on the MCP server’s available tools, prompts, and resources.
+Automatic Tool ChainingSection titled “Automatic Tool Chaining”
+The plugin features automatic tool chaining, which enables more powerful interactions between tools:
+When a tool returns a file path, the system can automatically use filesystem tools if available to read the content
+Structured data outputs from one tool can serve as inputs to another tool
+Complex workflows can be automated without requiring explicit tool invocation for each step
+For example, if a tool generates a code file and returns its path, the system will automatically detect this and can:
+Read the file content using filesystem tools if available by a plugin or via filesystem mcp server.
+Present the code with proper formatting
+Suggest further actions based on the file type
+Error HandlingSection titled “Error Handling”
+The plugin manages various error scenarios, such as:
+Connection failures to the MCP server.
+Invalid tool, prompt, or resource requests.
+Network errors or unexpected server responses.
+Errors are logged and relayed as informative messages to the Brain UI.
+Security ConsiderationsSection titled “Security Considerations”
+For SSE mode:
+Ensure you are connecting to a trusted MCP server.
+Use HTTPS endpoints for secure communication.
+Validate all configuration parameters to avoid misconfigurations.
+Learn More About MCPSection titled “Learn More About MCP”
+For more details on the Model Context Protocol and available server implementations, check out these resources:
+MCP Servers on GitHub:
+Explore a collection of MCP server implementations at
+github.com/modelcontextprotocol/servers
+.
+Introduction to MCP:
+Learn about the core concepts and benefits of MCP at
+modelcontextprotocol.io/introduction
+.
+
+================================================================================
+
+================================================================================
+TITLE: Wallet Plugin | Brain Framework
+URL: https://brain.iqai.com/plugins/wallet
+================================================================================
+
+Wallet Plugin
+The Plugin Wallet enables your agent to interact with blockchain wallets. It provides functionality for:
+Fetching token holdings across multiple chains
+Retrieving transaction history for specified wallets
+Supporting multiple blockchain networks via the Covalent API
+InstallationSection titled “Installation”
+Install the required package:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/plugin-wallet
+Terminal windowpnpm add @iqai/plugin-wallet
+Terminal windowyarn add @iqai/plugin-wallet
+Create a .env file with the required configuration:
+Terminal windowCOVALENT_API_KEY=your-covalent-api-keyWALLET_ADDRESS=your-wallet-address
+Basic SetupSection titled “Basic Setup”
+Here’s a complete example of setting up your agent with the Wallet Plugin:
+import { createWalletPlugin } from "@iqai/plugin-wallet";
+async function main() {
+// Initialize Wallet Plugin
+const walletPlugin = await createWalletPlugin({
+covalentApiKey: process.env.COVALENT_API_KEY,
+walletAddress: process.env.WALLET_ADDRESS,
+});
+// Integrate walletPlugin with your agent or system
+const agent = new AgentBuilder().withPlugin(walletPlugin).build();
+await agent.start();}
+main().catch(console.error);
+Available OperationsSection titled “Available Operations”
+Holdings Retrieval: Fetch token balances for a wallet
+Transaction History: Retrieve transaction details including timestamps, status, and gas information
+Usage ExamplesSection titled “Usage Examples”
+OperationExample QueryCheck Holdingsget my holdings on fraxtalCheck Holdingsshow my tokens on eth-mainnetCheck Transactionsget my transactions on fraxtalCheck Transactionsview transaction history of 0x1234...5678 on polygon
+Configuration OptionsSection titled “Configuration Options”
+The Wallet Plugin accepts the following configuration parameters:
+interface WalletPluginConfig {
+covalentApiKey: string;
+// Covalent API key for blockchain data access
+walletAddress: string;
+// Default wallet address}
+Error HandlingSection titled “Error Handling”
+Always implement proper error handling when using the plugin:
+try {
+const walletPlugin = await createWalletPlugin({
+covalentApiKey: process.env.COVALENT_API_KEY,
+walletAddress: process.env.WALLET_ADDRESS,
+});} catch (error) {
+console.error('Failed to initialize Wallet Plugin:', error);}
+Best PracticesSection titled “Best Practices”
+Chain Validation: Verify supported chain names before making requests
+Address Verification: Ensure wallet addresses are correct and valid
+Rate Limit Awareness: Handle API rate limits according to Covalent guidelines
+Security Measures: Keep your API key secure and never expose it publicly
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Invalid Chain Name: Ensure you’re using supported chain names as per the Covalent API documentation.
+Missing Wallet Address: If required, provide a valid wallet address.
+API Connection Errors: Check your network connectivity and API key validity.
+Rate Limiting: Be aware of the API rate limits and implement retries or backoff mechanisms.
+
+================================================================================
+
+================================================================================
+TITLE: Discord Client | Brain Framework
+URL: https://brain.iqai.com/clients/discord
+================================================================================
+
+Discord Client
+The Discord Client enables your agent to interact with Discord servers, supporting message handling, voice interactions, and slash commands. Visit Elizaos
+Discord client docs
+for more details.
+InstallationSection titled “Installation”
+Install required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/client-discord @elizaos/[email protected]
+Terminal windowpnpm add github:elizaos-plugins/client-discord @elizaos/[email protected]
+Terminal windowyarn add github:elizaos-plugins/client-discord @elizaos/[email protected]
+Configure environment variables:
+Terminal window# Required Discord credentialsDISCORD_API_TOKEN=your_bot_token
+Basic SetupSection titled “Basic Setup”
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import DiscordClient from "@elizaos/client-discord";import SqliteAdapter from "@elizaos/adapter-sqlite";
+async function main() {
+const agent = new AgentBuilder()
+.withDatabase(SqliteAdapter)
+.withClient(DiscordClient)
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withCharacter({
+name: "DiscordBot",
+bio: "A helpful Discord assistant",
+username: "brain-bot"
+})
+.build();
+await agent.start();}
+main().catch(console.error);
+Best PracticesSection titled “Best Practices”
+Always initialize with a database adapter
+Set appropriate character configuration for Discord context
+Handle client startup errors appropriately
+Implement proper Discord permission handling
+
+================================================================================
+
+================================================================================
+TITLE: Telegram Client | Brain Framework
+URL: https://brain.iqai.com/clients/telegram
+================================================================================
+
+Telegram Client
+The Telegram Client enables your agent to interact through Telegram, supporting both group chats and direct messages. Visit Elizaos
+Telegram client docs
+for more details.
+InstallationSection titled “Installation”
+Install required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/client-telegram @elizaos/[email protected]
+Terminal windowpnpm add github:elizaos-plugins/client-telegram @elizaos/[email protected]
+Terminal windowyarn add github:elizaos-plugins/client-telegram @elizaos/[email protected]
+Configure environment variables:
+Terminal windowTELEGRAM_BOT_TOKEN=your_bot_token
+Basic SetupSection titled “Basic Setup”
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import TelegramClient from "@elizaos/client-telegram";import SqliteAdapter from "@elizaos/adapter-sqlite";
+async function main() {
+const agent = new AgentBuilder()
+.withDatabase(SqliteAdapter)
+.withClient(TelegramClient)
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withCharacter({
+name: "TelegramBot",
+bio: "A helpful Telegram assistant",
+username: "brain_bot"
+})
+.build();
+await agent.start();}
+main().catch(console.error);
+
+================================================================================
+
+================================================================================
+TITLE: Twitter Client | Brain Framework
+URL: https://brain.iqai.com/clients/twitter
+================================================================================
+
+Twitter Client
+The Twitter Client enables your agent to interact through Twitter, supporting both group chats and direct messages. Visit Elizaos
+Twitter/x client docs
+for more details.
+InstallationSection titled “Installation”
+Install required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/client-twitter @elizaos/[email protected]
+Terminal windowpnpm add github:elizaos-plugins/client-twitter @elizaos/[email protected]
+Terminal windowyarn add github:elizaos-plugins/client-twitter @elizaos/[email protected]
+Configure environment variables:
+Terminal window # Twitter API Credentials TWITTER_USERNAME=
+# Your Twitter/X username TWITTER_PASSWORD=
+# Your Twitter/X password TWITTER_EMAIL=
+# Your Twitter/X email TWITTER_2FA_SECRET=
+# Optional: 2FA secret for login
+# Twitter Client Configuration TWITTER_DRY_RUN=false
+# Set to true for testing without posting MAX_TWEET_LENGTH=280
+# Default tweet length limit TWITTER_SEARCH_ENABLE=false # Enable search functionality TWITTER_RETRY_LIMIT=5
+# Login retry attempts TWITTER_POLL_INTERVAL=120
+# Poll interval in seconds TWITTER_TARGET_USERS=
+# Comma-separated list of target users
+# Post Generation Settings TWITTER_ENABLE_POST_GENERATION=true POST_INTERVAL_MIN=90
+# Minimum interval between posts (minutes) POST_INTERVAL_MAX=180
+# Maximum interval between posts (minutes) POST_IMMEDIATELY=false
+# Skip approval workflow
+# Action Processing ENABLE_ACTION_PROCESSING=false ACTION_INTERVAL=5
+# Action check interval (minutes) MAX_ACTIONS_PROCESSING=1
+# Maximum concurrent actions
+# Spaces Configuration (Optional) TWITTER_SPACES_ENABLE=false ELEVENLABS_XI_API_KEY=
+# Required for TTS in Spaces
+# Approval Workflow (Optional) TWITTER_APPROVAL_DISCORD_BOT_TOKEN= TWITTER_APPROVAL_DISCORD_CHANNEL_ID= TWITTER_APPROVAL_CHECK_INTERVAL=300000
+# 5 minutes in milliseconds
+Basic SetupSection titled “Basic Setup”
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import TwitterClient from "@elizaos/client-twitter";import SqliteAdapter from "@elizaos/adapter-sqlite";
+async function main() {
+const agent = new AgentBuilder()
+.withDatabase(SqliteAdapter)
+.withClient(TwitterClient)
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withCharacter({
+name: "TwitterBot",
+bio: "A helpful Twitter assistant",
+username: "brain_bot"
+})
+.build();
+await agent.start();}
+main().catch(console.error);
+
+================================================================================
+
+================================================================================
+TITLE: SQLite Adapter | Brain Framework
+URL: https://brain.iqai.com/adapters/sqlite
+================================================================================
+
+SQLite Adapter
+The SQLite Adapter provides embedded database functionality, ideal for development and single-instance deployments. Visit Elizaos
+SQLite Adapter docs
+for more details.
+InstallationSection titled “Installation”
+Install required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/adapter-sqlite
+Terminal windowpnpm add github:elizaos-plugins/adapter-sqlite
+Terminal windowyarn add github:elizaos-plugins/adapter-sqlite
+Basic SetupSection titled “Basic Setup”
+import { AgentBuilder } from "@iqai/agent";import SqliteAdapter from "@elizaos/adapter-sqlite";
+const databaseAdapter = new SqliteDatabaseAdapter();
+const agent = new AgentBuilder()
+.withDatabase(databaseAdapter)
+// ... other configuration
+.build();
+Key FeaturesSection titled “Key Features”
+✔️ Built-in caching
+✔️ BLOB storage support
+✔️ Zero setup requirements
+Collections StructureSection titled “Collections Structure”
+The adapter automatically manages these collections:
+rooms
+participants
+accounts
+memories
+knowledge
+Additional metadata is stored as JSON within these collections.
+Best PracticesSection titled “Best Practices”
+✔️ Use for development and testing
+✔️ Monitor database file size
+Tip
+SQLite is ideal for development, testing, and single-instance deployments where simplicity is key.
+
+================================================================================
+
+================================================================================
+TITLE: PostgreSQL Adapter | Brain Framework
+URL: https://brain.iqai.com/adapters/postgres
+================================================================================
+
+PostgreSQL Adapter
+The PostgreSQL Adapter provides robust database functionality with vector search capabilities, ideal for production deployments. Visit Elizaos
+PostgreSQL Adapter docs
+for more details.
+InstallationSection titled “Installation”
+Install required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/adapter-postgres
+Terminal windowpnpm add github:elizaos-plugins/adapter-postgres
+Terminal windowyarn add github:elizaos-plugins/adapter-postgres
+Setup env variable:
+Terminal windowPOSTGRES_URL=postgresql://user:pass@localhost:5432/db
+Enable vector search extension:
+Terminal windowCREATE EXTENSION vector;
+Basic SetupSection titled “Basic Setup”
+import { AgentBuilder } from "@iqai/agent";import PostgresAdapter from "@elizaos/adapter-postgres";
+const agent = new AgentBuilder()
+.withDatabase(PostgresAdapter)
+// ... other configuration
+.build();
+Key FeaturesSection titled “Key Features”
+✔️ Vector search support
+✔️ Comprehensive logging
+✔️ Production scaling
+Best PracticesSection titled “Best Practices”
+✔️ Use for production deployments
+✔️ Enable connection pooling
+✔️ Implement proper indexing
+✔️ Monitor vector search performance
+Caution
+Ensure pgvector extension is installed before initializing the adapter.
+Tip
+PostgreSQL is recommended for prodcution deployments requiring vector search capabilities.
+
+================================================================================

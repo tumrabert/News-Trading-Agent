@@ -1,0 +1,42 @@
+URL: https://brain.iqai.com/plugins/node
+==================================================
+
+Node Plugin
+The Node Plugin provides essential services for web browsing, media processing, and content analysis through Node.js.
+InstallationSection titled “Installation”
+Install the package:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/plugin-node
+Terminal windowpnpm add github:elizaos-plugins/plugin-node
+Terminal windowyarn add github:elizaos-plugins/plugin-node
+UsageSection titled “Usage”
+import { createNodePlugin } from "@eliza/plugin-node";
+const nodePlugin = createNodePlugin();
+const agent = new AgentBuilder()
+.withPlugin(nodePlugin)
+.build();
+Available ServicesSection titled “Available Services”
+ServiceDescriptionKey FeaturesBrowserServiceWeb capabilitiesPage loading, content extraction, screenshotsImageDescriptionServiceImage analysisContent recognition, caption generationLlamaServiceLLM integrationText generation, analysisPdfServicePDF handlingReading, parsing, text extractionSpeechServiceText-to-speechAudio generation, voice synthesisTranscriptionServiceSpeech-to-textAudio transcription, language detectionVideoServiceVideo processingFormat conversion, frame extraction
+ConfigurationSection titled “Configuration”
+interface NodePluginConfig {
+browserOptions?: {
+headless?: boolean;
+timeout?: number;
+};
+speechOptions?: {
+defaultVoice?: string;
+outputFormat?: string;
+};
+videoOptions?: {
+maxDuration?: number;
+outputFormats?: string[];
+};}
+Best PracticesSection titled “Best Practices”
+Handle service errors appropriately
+Implement timeouts for browser operations
+Cache processed media when possible
+Monitor resource usage for media operations
+Tip
+Configure service-specific options based on your performance requirements.

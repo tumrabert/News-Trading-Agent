@@ -1,0 +1,122 @@
+URL: https://brain.iqai.com/plugins/heartbeat
+==================================================
+
+Heartbeat Plugin
+The Heartbeat Plugin enables automated scheduling of tasks and social media interactions. It provides functionality for:
+Scheduling periodic messages using cron-based timing
+Posting to social media platforms like Twitter and Telegram
+Maintaining continuous agent interactions
+Supporting multiple concurrent schedules
+InstallationSection titled “Installation”
+Install the required package:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/plugin-heartbeat
+Terminal windowpnpm add @iqai/plugin-heartbeat
+Terminal windowyarn add @iqai/plugin-heartbeat
+Create a .env file with platform-specific configurations as needed:
+Terminal windowTELEGRAM_CHAT_ID=your-chat-id
+Basic SetupSection titled “Basic Setup”
+Here’s a complete example of setting up an agent with the Heartbeat plugin:
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import { createHeartbeatPlugin } from "@iqai/plugin-heartbeat";
+async function main() {
+// Initialize Heartbeat plugin
+const heartbeatPlugin = await createHeartbeatPlugin([
+{
+period: "*/30 * * * * *",
+// Every 30 seconds
+input: "Post a crypto market update",
+clients: [
+{
+type: "telegram",
+chatId: process.env.TELEGRAM_CHAT_ID as string
+}
+]
+}
+]);
+// Create agent with plugin
+const agent = new AgentBuilder()
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withPlugin(heartbeatPlugin)
+.build();
+await agent.start();}main().catch(console.error);
+⚙ ConfigurationSection titled “⚙ Configuration”
+The plugin requires configuration for clients. Currently heartbeat plugin supports Twitter, Telegram, and callback functions.
+🔧 Platform📜 Configuration NeededTwitter{ type: "twitter" }Telegram{ type: "telegram", chatId: string }Callback{ type: "callback", callback: (content: string, roomId: string) => Promise<void> }
+Usage ExamplesSection titled “Usage Examples”
+Telegram UpdatesSection titled “Telegram Updates”
+{
+"period": "*/30 * * * * *",
+// Every 30 seconds
+"input": "Post a crypto joke",
+"clients": [
+{
+"type": "telegram",
+"chatId": "-1234567890"
+}
+]}
+Hourly Twitter PostsSection titled “Hourly Twitter Posts”
+{
+"period": "0 */1 * * *",
+// Every hour
+"input": "Market update post",
+"clients": [
+{
+"type": "twitter"
+}
+]}
+Daily News SummarySection titled “Daily News Summary”
+{
+"period": "0 0 * * *",
+// Once per day at midnight
+"input": "Create a daily crypto news summary",
+"clients": [
+{
+"type": "telegram",
+"chatId": "-1234567890"
+}
+]}
+Custom CallbackSection titled “Custom Callback”
+{
+"period": "*/30 * * * * *",
+// Every 30 seconds
+"input": "Post a crypto market update",
+"clients": [
+{
+"type": "callback",
+"callback": (content, roomId) => console.log(`Message for ${roomId}: ${content}`)
+}
+]}
+Multiple Clients ExampleSection titled “Multiple Clients Example”
+{
+"period": "0 12 * * *",
+// Every day at noon
+"input": "Generate daily market report",
+"clients": [
+{
+"type": "twitter"
+},
+{
+"type": "telegram",
+"chatId": "-1234567890"
+}
+],
+"onlyFinalOutput": true,
+"shouldPost": (response) => response.length > 100,
+"formatResponse": async (response, runtime) => {
+return `📊 DAILY REPORT 📊\n\n${response}`;
+}}
+Best PracticesSection titled “Best Practices”
+Cron Expressions: Use appropriate intervals to avoid rate limiting
+Message Content: Keep prompts clear and specific
+Platform Guidelines: Follow social media posting guidelines
+Error Handling: Implement proper error handling for failed posts
+Common Issues and TroubleshootingSection titled “Common Issues and Troubleshooting”
+Invalid Cron Expression: Verify your scheduling syntax
+Missing Configuration: Ensure platform-specific configs are provided
+Rate Limiting: Monitor and adjust posting frequencies
+Network Issues: Implement retry logic for failed requests

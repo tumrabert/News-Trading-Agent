@@ -1,0 +1,38 @@
+URL: https://brain.iqai.com/adapters/postgres
+==================================================
+
+PostgreSQL Adapter
+The PostgreSQL Adapter provides robust database functionality with vector search capabilities, ideal for production deployments. Visit Elizaos
+PostgreSQL Adapter docs
+for more details.
+InstallationSection titled “Installation”
+Install required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/adapter-postgres
+Terminal windowpnpm add github:elizaos-plugins/adapter-postgres
+Terminal windowyarn add github:elizaos-plugins/adapter-postgres
+Setup env variable:
+Terminal windowPOSTGRES_URL=postgresql://user:pass@localhost:5432/db
+Enable vector search extension:
+Terminal windowCREATE EXTENSION vector;
+Basic SetupSection titled “Basic Setup”
+import { AgentBuilder } from "@iqai/agent";import PostgresAdapter from "@elizaos/adapter-postgres";
+const agent = new AgentBuilder()
+.withDatabase(PostgresAdapter)
+// ... other configuration
+.build();
+Key FeaturesSection titled “Key Features”
+✔️ Vector search support
+✔️ Comprehensive logging
+✔️ Production scaling
+Best PracticesSection titled “Best Practices”
+✔️ Use for production deployments
+✔️ Enable connection pooling
+✔️ Implement proper indexing
+✔️ Monitor vector search performance
+Caution
+Ensure pgvector extension is installed before initializing the adapter.
+Tip
+PostgreSQL is recommended for prodcution deployments requiring vector search capabilities.

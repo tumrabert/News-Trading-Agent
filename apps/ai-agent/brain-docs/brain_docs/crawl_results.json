@@ -1,0 +1,195 @@
+[
+  {
+    "url": "https://brain.iqai.com/getting-started/overview",
+    "title": "Overview | Brain Framework",
+    "filename": "getting-started_overview.txt",
+    "status": "success",
+    "text_length": 2072
+  },
+  {
+    "url": "https://brain.iqai.com/getting-started/quickstart",
+    "title": "Quick Start | Brain Framework",
+    "filename": "getting-started_quickstart.txt",
+    "status": "success",
+    "text_length": 4423
+  },
+  {
+    "url": "https://brain.iqai.com/getting-started/agent-creation",
+    "title": "Agent Creation | Brain Framework",
+    "filename": "getting-started_agent-creation.txt",
+    "status": "success",
+    "text_length": 5675
+  },
+  {
+    "url": "https://brain.iqai.com/getting-started/creating-plugins",
+    "title": "Creating Plugins | Brain Framework",
+    "filename": "getting-started_creating-plugins.txt",
+    "status": "success",
+    "text_length": 3431
+  },
+  {
+    "url": "https://brain.iqai.com/getting-started/test-agent",
+    "title": "Testing Your Agent | Brain Framework",
+    "filename": "getting-started_test-agent.txt",
+    "status": "success",
+    "text_length": 1379
+  },
+  {
+    "url": "https://brain.iqai.com/getting-started/deployment",
+    "title": "Deployment | Brain Framework",
+    "filename": "getting-started_deployment.txt",
+    "status": "success",
+    "text_length": 12022
+  },
+  {
+    "url": "https://brain.iqai.com/getting-started/example-agents",
+    "title": "Example Agents | Brain Framework",
+    "filename": "getting-started_example-agents.txt",
+    "status": "success",
+    "text_length": 1568
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/overview",
+    "title": "Plugins | Brain Framework",
+    "filename": "plugins_overview.txt",
+    "status": "success",
+    "text_length": 2766
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/abi",
+    "title": "ABI Plugin | Brain Framework",
+    "filename": "plugins_abi.txt",
+    "status": "success",
+    "text_length": 5162
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/near",
+    "title": "Plugin NEAR | Brain Framework",
+    "filename": "plugins_near.txt",
+    "status": "success",
+    "text_length": 5542
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/fraxlend",
+    "title": "FraxLend Plugin | Brain Framework",
+    "filename": "plugins_fraxlend.txt",
+    "status": "success",
+    "text_length": 3854
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/odos",
+    "title": "Odos Plugin | Brain Framework",
+    "filename": "plugins_odos.txt",
+    "status": "success",
+    "text_length": 2995
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/wiki",
+    "title": "Wiki Plugin | Brain Framework",
+    "filename": "plugins_wiki.txt",
+    "status": "success",
+    "text_length": 5079
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/atp",
+    "title": "ATP Plugin | Brain Framework",
+    "filename": "plugins_atp.txt",
+    "status": "success",
+    "text_length": 3630
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/bamm",
+    "title": "BAMM Plugin | Brain Framework",
+    "filename": "plugins_bamm.txt",
+    "status": "success",
+    "text_length": 3587
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/heartbeat",
+    "title": "Heartbeat Plugin | Brain Framework",
+    "filename": "plugins_heartbeat.txt",
+    "status": "success",
+    "text_length": 3692
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/sequencer",
+    "title": "Sequencer Plugin | Brain Framework",
+    "filename": "plugins_sequencer.txt",
+    "status": "success",
+    "text_length": 1362
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/bootstrap",
+    "title": "Bootstrap Plugin | Brain Framework",
+    "filename": "plugins_bootstrap.txt",
+    "status": "success",
+    "text_length": 2402
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/images",
+    "status": "failed_404"
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/node",
+    "title": "Node Plugin | Brain Framework",
+    "filename": "plugins_node.txt",
+    "status": "success",
+    "text_length": 1660
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/solana",
+    "title": "Solana Plugin | Brain Framework",
+    "filename": "plugins_solana.txt",
+    "status": "success",
+    "text_length": 1459
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/mcp",
+    "title": "MCP Plugin | Brain Framework",
+    "filename": "plugins_mcp.txt",
+    "status": "success",
+    "text_length": 4512
+  },
+  {
+    "url": "https://brain.iqai.com/plugins/wallet",
+    "title": "Wallet Plugin | Brain Framework",
+    "filename": "plugins_wallet.txt",
+    "status": "success",
+    "text_length": 3022
+  },
+  {
+    "url": "https://brain.iqai.com/clients/discord",
+    "title": "Discord Client | Brain Framework",
+    "filename": "clients_discord.txt",
+    "status": "success",
+    "text_length": 1455
+  },
+  {
+    "url": "https://brain.iqai.com/clients/telegram",
+    "title": "Telegram Client | Brain Framework",
+    "filename": "clients_telegram.txt",
+    "status": "success",
+    "text_length": 1177
+  },
+  {
+    "url": "https://brain.iqai.com/clients/twitter",
+    "title": "Twitter Client | Brain Framework",
+    "filename": "clients_twitter.txt",
+    "status": "success",
+    "text_length": 2383
+  },
+  {
+    "url": "https://brain.iqai.com/adapters/sqlite",
+    "title": "SQLite Adapter | Brain Framework",
+    "filename": "adapters_sqlite.txt",
+    "status": "success",
+    "text_length": 1289
+  },
+  {
+    "url": "https://brain.iqai.com/adapters/postgres",
+    "title": "PostgreSQL Adapter | Brain Framework",
+    "filename": "adapters_postgres.txt",
+    "status": "success",
+    "text_length": 1341
+  }
+]

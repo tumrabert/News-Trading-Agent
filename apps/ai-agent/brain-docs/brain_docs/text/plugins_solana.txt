@@ -1,0 +1,39 @@
+URL: https://brain.iqai.com/plugins/solana
+==================================================
+
+Solana Plugin
+The Solana Plugin provides blockchain functionality including wallet management and transaction trust evaluation.
+InstallationSection titled “Installation”
+Install the package:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/plugin-solana
+Terminal windowpnpm add github:elizaos-plugins/plugin-solana
+Terminal windowyarn add github:elizaos-plugins/plugin-solana
+Configure environment:
+Terminal windowSOLANA_PRIVATE_KEY=your-wallet-private-keySOLANA_RPC_URL=your-rpc-endpoint
+UsageSection titled “Usage”
+import { createSolanaPlugin } from "@eliza/plugin-solana";
+const solanaPlugin = createSolanaPlugin({
+privateKey: process.env.SOLANA_PRIVATE_KEY,
+rpcUrl: process.env.SOLANA_RPC_URL});
+const agent = new AgentBuilder()
+.withPlugin(solanaPlugin)
+.build();
+FeaturesSection titled “Features”
+EvaluatorsSection titled “Evaluators”
+EvaluatorDescriptiontrustEvaluatorAssess transaction trust scores
+ProvidersSection titled “Providers”
+ProviderDescriptionwalletProviderWallet management and operationstrustScoreProviderTransaction trust metrics
+ConfigurationSection titled “Configuration”
+interface SolanaPluginConfig {
+privateKey: string;
+rpcUrl: string;
+network?: "mainnet" | "testnet" | "devnet";
+trustScoreThreshold?: number;}
+Best PracticesSection titled “Best Practices”
+Implement proper error handling for transactions
+Validate addresses before operations
+Monitor trust scores for suspicious activity
+Use appropriate network for testing

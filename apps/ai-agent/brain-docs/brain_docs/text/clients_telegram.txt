@@ -1,0 +1,35 @@
+URL: https://brain.iqai.com/clients/telegram
+==================================================
+
+Telegram Client
+The Telegram Client enables your agent to interact through Telegram, supporting both group chats and direct messages. Visit Elizaos
+Telegram client docs
+for more details.
+InstallationSection titled “Installation”
+Install required packages:
+npm
+pnpm
+yarn
+Terminal windownpm i github:elizaos-plugins/client-telegram @elizaos/[email protected]
+Terminal windowpnpm add github:elizaos-plugins/client-telegram @elizaos/[email protected]
+Terminal windowyarn add github:elizaos-plugins/client-telegram @elizaos/[email protected]
+Configure environment variables:
+Terminal windowTELEGRAM_BOT_TOKEN=your_bot_token
+Basic SetupSection titled “Basic Setup”
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import TelegramClient from "@elizaos/client-telegram";import SqliteAdapter from "@elizaos/adapter-sqlite";
+async function main() {
+const agent = new AgentBuilder()
+.withDatabase(SqliteAdapter)
+.withClient(TelegramClient)
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withCharacter({
+name: "TelegramBot",
+bio: "A helpful Telegram assistant",
+username: "brain_bot"
+})
+.build();
+await agent.start();}
+main().catch(console.error);

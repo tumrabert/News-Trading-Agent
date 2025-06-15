@@ -1,0 +1,62 @@
+URL: https://brain.iqai.com/plugins/overview
+==================================================
+
+Plugins
+Brain Framework’s plugin system allows you to extend your agent’s capabilities with various integrations. Each plugin adds specific functionality, such as DeFi operations, token swaps, or other blockchain interactions.
+Utility PluginsSection titled “Utility Plugins”
+Heartbeat Plugin
+Schedule automated messages and social media posts with support for multiple concurrent schedules
+Sequencer Plugin
+Chain multiple actions from a single user query with state management between operations
+MCP Plugin
+Mediate communication between Brain Framework and external MCP servers
+Wallet Plugin
+Interact with blockchain wallets to fetch holdings and transaction history across multiple chains
+DeFi PluginsSection titled “DeFi Plugins”
+FraxLend Plugin
+Enable lending and borrowing operations on Fraxtal network
+Odos Plugin
+Execute optimized token swaps with quote retrieval
+ATP Plugin
+Interact with IQ's Agent Tokenization Platform for buying, selling, and managing tokens
+BAMM Plugin
+Enable borrowing and lending operations on Frax BAMM pools
+Using PluginsSection titled “Using Plugins”
+import { AgentBuilder, ModelProviderName } from "@iqai/agent";import { createFraxlendPlugin } from "@iqai/plugin-fraxlend";import { createOdosPlugin } from "@iqai/plugin-odos";import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";import { fraxtal } from "viem/chains";
+async function main() {
+const fraxlendPlugin = await createFraxlendPlugin({
+chain: fraxtal,
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+});
+const odosPlugin = await createOdosPlugin({
+chain: fraxtal,
+walletPrivateKey: process.env.WALLET_PRIVATE_KEY,
+});
+const agent = new AgentBuilder()
+.withClient(DirectClient)
+.withModelProvider(
+ModelProviderName.OPENAI,
+process.env.OPENAI_API_KEY
+)
+.withPlugin(bootstrapPlugin)
+.withPlugin(fraxlendPlugin)
+.withPlugin(odosPlugin)
+.build();
+await agent.start();}
+main().catch(console.error);
+Security Warning
+Never commit sensitive information like API keys, private keys, or environment variables. In particular, your wallet private key requires extra caution as anyone with access can control your funds. Make sure to:
+Add .env to your .gitignore file
+Keep all sensitive credentials and API keys secure and never share them
+Never commit or share your private keys under any circumstances
+Use dedicated development credentials and wallets with limited access/funds
+Regularly rotate API keys and credentials following security best practices
+Using elizaOS pluginsSection titled “Using elizaOS plugins”
+Browse the full collection of community plugins at
+ElizaOS Plugins
+, including:
+Additional client interfaces
+Data storage solutions
+Integration tools
+Utility plugins
+This compatibility ensures you have access to a wide range of tools while building your agents.

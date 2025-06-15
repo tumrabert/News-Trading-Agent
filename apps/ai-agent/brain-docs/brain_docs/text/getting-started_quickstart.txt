@@ -1,0 +1,94 @@
+URL: https://brain.iqai.com/getting-started/quickstart
+==================================================
+
+Quick Start
+In this guide, we’ll create a basic AI agent using Brain Framework from scratch. Before we go further, ensure you have Nodejs installed on your machine. You can download it from here.
+Caution
+Node version should be 23.x. Any version below 23 will not work.
+Using Brain Starter TemplateSection titled “Using Brain Starter Template”
+The fastest way to get started is using our pre-configured starter template which has all the basic setup ready to go.
+Clone the brain-starter repository:
+Terminal windowgit clone https://github.com/IQAIcom/brain-starter.git my-brain-agentcd my-brain-agent
+Install the dependencies:
+npm
+pnpm
+yarn
+Terminal windownpm install
+Terminal windowpnpm install
+Terminal windowyarn install
+Start the development server:
+npm
+pnpm
+yarn
+Terminal windownpm run dev
+Terminal windowpnpm run dev
+Terminal windowyarn run dev
+Test your agent:
+After starting your agent, visit IQAI Console to interact with it through a ready-to-use interface. This allows you to test your agent without building a custom client application.
+Creating a New Project From ScratchSection titled “Creating a New Project From Scratch”
+If you prefer to set up your project from scratch, you can follow these steps:
+Set up your project structure:
+Terminal windowmkdir -p my-brain-agent/{src,data} && cd my-brain-agent
+Setup project
+Terminal windownpm init
+npm
+pnpm
+yarn
+Terminal windownpm i -D typescript && npx tsc --init
+Terminal windowpnpm add -D typescript && npx tsc --init
+Terminal windowyarn add -D typescript && npx tsc --init
+Create index and env file
+Terminal windowtouch src/index.ts .env
+Install the required Brain Framework packages:
+npm
+pnpm
+yarn
+Terminal windownpm i @iqai/agent github:elizaos-plugins/adapter-sqlite @elizaos/[email protected] sharp dotenv
+Terminal windowpnpm add @iqai/agent github:elizaos-plugins/adapter-sqlite @elizaos/[email protected] sharp dotenv
+Terminal windowyarn add @iqai/agent github:elizaos-plugins/adapter-sqlite @elizaos/[email protected] sharp dotenv
+Add your OpenAI API key to the .env file:
+OPENAI_API_KEY=your_openai_api_key_here
+Creating Your First AgentSection titled “Creating Your First Agent”
+To create an agent, you’ll need three key components:
+LLM Model Provider: Choose your preferred language model (OpenAI, Claude, etc.) that will power your agent’s intelligence.
+Client Interface: Select how users will interact with your agent. Brain Framework supports various client integrations including Discord, Telegram, Twitter, Instagram, WhatsApp and more. In this example, we’ll use the Direct client which provides HTTP endpoints for interaction.
+Prompts and Plugins: Define your agent’s behavior through prompts and extend functionality using plugins. In this quickstart example, we’ll use the default prompts that come with the framework. For customizing prompts and adding plugins, check out Agent Creation Guide.
+Open src/index.ts in your favorite code editor and add the following code:
+import SqliteAdapter from "@elizaos/adapter-sqlite";import DirectClient from "@elizaos/client-direct";import { AgentBuilder, ModelProviderName } from "@iqai/agent";import dotenv from "dotenv";
+// Load environment variablesdotenv.config();
+async function main() {
+// Create your agent with basic configuration
+const agent = new AgentBuilder()
+.withModelProvider(ModelProviderName.OPENAI, process.env.OPENAI_API_KEY)
+.withDatabase(SqliteAdapter)
+.withClient(DirectClient)
+.build();
+// Start your agent
+await agent.start();
+console.log("Agent is running! You can test it using the IQAI Console.");}
+main().catch(console.error);
+Update your package.json to support ES modules and scripts:
+{
+"type": "module",
+"scripts": {
+"dev": "node src/index.ts"
+}}
+Run your agent:
+npm
+pnpm
+yarn
+Terminal windownpm run dev
+Terminal windowpnpm run dev
+Terminal windowyarn run dev
+Test your agent:
+After starting your agent, visit IQAI Console to interact with it through a ready-to-use interface. This allows you to test your agent without building a custom client application.
+For more details on testing your agent, check out Testing Your Agent
+Next StepsSection titled “Next Steps”
+Now that you have a basic agent running, you can:
+Explore different options you can pass though Agent
+Add Plugins to extend your agent’s functionality
+Create your own plugins using Plugin Creation Guide
+Deploy your agent to a production environment
+Check out our
+Examples Repo
+to see more advanced use cases

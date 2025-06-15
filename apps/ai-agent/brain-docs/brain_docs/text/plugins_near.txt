@@ -1,0 +1,84 @@
+URL: https://brain.iqai.com/plugins/near
+==================================================
+
+Plugin NEAR
+The NEAR Plugin provides a seamless integration with the NEAR Protocol blockchain, enabling smart contract interactions, transaction handling, and event listening capabilities directly from your agent.
+InstallationSection titled “Installation”
+Install the plugin using your preferred package manager:
+Terminal windowpnpm add @iqai/plugin-near
+UsageSection titled “Usage”
+Initialize and configure the NEAR plugin in your agent setup:
+import createNearPlugin from "@iqai/plugin-near";import { AgentBuilder } from "@iqai/agent";
+// Initialize the pluginconst nearPlugin = await createNearPlugin({
+accountId: process.env.NEAR_ACCOUNT_ID,
+accountKey: process.env.NEAR_PRIVATE_KEY,
+listeners: [
+{
+eventName: "run_agent",
+contractId: "your-contract.testnet",
+responseMethodName: "agent_response",
+handler: async (payload, { account }) => {
+// Custom event handling logic
+return "result";
+},
+}
+],
+networkConfig: {
+networkId: "testnet", // or "mainnet"
+nodeUrl: "https://test.rpc.fastnear.com",
+},});
+// Add the plugin to your agentconst agent = new AgentBuilder()
+// other configurations
+.withPlugin(nearPlugin)
+.build();
+ConfigurationSection titled “Configuration”
+The plugin requires the following environment variables:
+Variable NameDescriptionNEAR_ACCOUNT_IDYour NEAR account ID for authenticationNEAR_PRIVATE_KEYPrivate key for your NEAR account
+Configuration OptionsSection titled “Configuration Options”
+Below are all available configuration options for the NEAR plugin:
+OptionTypeRequiredDescriptionaccountIdstringYesYour NEAR account ID for authenticationaccountKeystringYesPrivate key for your NEAR accountlistenersArrayYesArray of event listener configurations (see Event Listener Options table)gasLimitstringNoDefault gas limit for transactionsnetworkConfig.networkIdstringNoNetwork ID (“testnet” or “mainnet”)networkConfig.nodeUrlstringNoNEAR RPC endpoint URL
+Event Listener OptionsSection titled “Event Listener Options”
+Each event listener in the listeners array accepts the following options:
+OptionTypeRequiredDescriptioneventNamestringYesName of the event to listen forcontractIdstringYesContract ID that emits the eventhandlerFunctionYesFunction that processes the event and returns a responseresponseMethodNamestringNoContract method to call with the responsecronExpressionstringNoOptional cron schedule for timed events
+Handler ContextSection titled “Handler Context”
+The handler function receives two parameters:
+ParameterTypeDescriptionpayloadanyEvent data from the smart contractcontextObjectContext object containing the NEAR accountcontext.accountAccountNEAR account instance for making calls to contracts
+Event-Driven AI Agents on NEARSection titled “Event-Driven AI Agents on NEAR”
+This plugin enables a powerful workflow for implementing AI agents that interact with NEAR blockchain smart contracts:
+Event Trigger: A blockchain transaction triggers an event on a smart contract and pauses, waiting for input from an AI agent
+Agent Monitoring: Your AI agent, powered by this plugin, monitors the blockchain for these specific events
+Computation: When an event is detected, the agent performs AI-driven computations or analysis based on the event data
+Response Transaction: The agent submits the result back to the blockchain via a transaction
+Contract Resumption: The original smart contract receives the AI agent’s response and continues its execution with this new data
+This event-driven architecture enables “AI in the loop” systems where blockchain operations can incorporate intelligent decision-making at specific points in their execution.
+Inside your handler functions, you can:
+Parse the incoming data
+Run AI inference or complex computations
+Call other NEAR contracts to gather additional data
+Return a result that will be automatically sent back to the original contract
+Use CasesSection titled “Use Cases”
+The NEAR Plugin enables numerous use cases for AI integration with blockchain:
+Decentralized Finance (DeFi): Price predictions, risk analysis, optimal trading paths
+Gaming: Intelligent NPCs, procedural content generation, dynamic difficulty adjustment
+Content Creation: On-chain verification of AI-generated assets or content
+Governance: Analysis of proposals and voting recommendations
+Data Markets: AI-powered data validation and enrichment services
+Error HandlingSection titled “Error Handling”
+When implementing event handlers, proper error handling is essential:
+try {
+// Your event processing logic
+const result = processData(payload);
+return result;} catch (error) {
+console.error("Agent processing failed:", error.message);
+// Return a fallback value or rethrow depending on your requirements}
+Best PracticesSection titled “Best Practices”
+Store your NEAR account ID and private key securely in environment variables
+Implement comprehensive input validation in your event handlers
+Design handlers to be idempotent when possible
+Add timeout handling for long-running event processor functions
+Log all events and responses for debugging purposes
+Test your agent thoroughly on testnet before deploying to mainnet
+Consider gas costs for response transactions in your design
+Implement circuit breakers to pause event handling if errors exceed thresholds
+ConclusionSection titled “Conclusion”
+The NEAR Plugin enables your agent to interact seamlessly with the NEAR blockchain, creating responsive AI agents that can participate in on-chain activities. This “AI in the loop” architecture opens up possibilities for building increasingly intelligent and responsive decentralized applications.
