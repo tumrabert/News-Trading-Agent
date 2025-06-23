@@ -1,6 +1,6 @@
-# Onchain Signal Platform
+# Memory Agent
 
-This monorepo contains the Onchain Signal platform, which consists of an AI agent for crypto trading signals and a frontend application to interact with the agent.
+This monorepo contains the Signal platform from NEWS, which consists of an AI agent for crypto trading signals and a frontend application to interact with the agent.
 
 ## Project Structure
 
