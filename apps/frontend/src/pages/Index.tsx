@@ -12,7 +12,7 @@ import UserMenu from "@/components/UserMenu";
 import { useWeb3Auth } from "@/hooks/useWeb3Auth";
 
 const Index = () => {
-  const { isConnected, isLoading } = useWeb3Auth();
+  const { isConnected, isLoading, initError } = useWeb3Auth();
 
   if (isLoading) {
     return (
@@ -21,6 +21,22 @@ const Index = () => {
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600 dark:text-gray-300">
             Loading Web3Auth...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (initError) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+            <strong className="font-bold">Web3Auth Error!</strong>
+            <span className="block sm:inline"> {initError}</span>
+          </div>
+          <p className="mt-4 text-gray-600 dark:text-gray-300">
+            Please check the console for more details.
           </p>
         </div>
       </div>

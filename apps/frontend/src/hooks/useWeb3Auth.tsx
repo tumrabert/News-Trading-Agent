@@ -1,51 +1,113 @@
 import { createContext, useContext, useEffect, useState } from 'react';
+import { Web3Auth } from '@web3auth/modal';
+import { CHAIN_NAMESPACES, IProvider, WEB3AUTH_NETWORK } from '@web3auth/base';
+import { EthereumPrivateKeyProvider } from '@web3auth/ethereum-provider';
 
 interface Web3AuthContextType {
   user: any;
   isLoading: boolean;
   isConnected: boolean;
+  provider: IProvider | null;
+  initError: string | null;
   login: () => Promise<void>;
   logout: () => Promise<void>;
 }
 
 const Web3AuthContext = createContext<Web3AuthContextType | undefined>(undefined);
 
+const clientId = 'BDlDFmqrcip10Uxk6l-xJkAoPfuVBjtqK2WUcckxQdTFKixnlmM2pIP1fQF76qzCvviQZ0lVAUkClidqBJ5u7zs';
+
+const chainConfig = {
+  chainNamespace: CHAIN_NAMESPACES.EIP155,
+  chainId: '0x1', // Ethereum mainnet  
+  rpcTarget: 'https://cloudflare-eth.com',
+  displayName: 'Ethereum Mainnet',
+  blockExplorerUrl: 'https://etherscan.io',
+  ticker: 'ETH',
+  tickerName: 'Ethereum',
+};
+
 export const Web3AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
+  const [provider, setProvider] = useState<IProvider | null>(null);
   const [user, setUser] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [initError, setInitError] = useState<string | null>(null);
   const [isConnected, setIsConnected] = useState(false);
 
   useEffect(() => {
-    // Check if user was previously connected (localStorage)
-    const savedConnection = localStorage.getItem('web3auth_connected');
-    const savedUser = localStorage.getItem('web3auth_user');
-    
-    if (savedConnection === 'true' && savedUser) {
-      setIsConnected(true);
-      setUser(JSON.parse(savedUser));
-    }
+    const init = async () => {
+      try {
+        console.log("Starting Web3Auth initialization...");
+        
+        // Create the private key provider with a working RPC endpoint
+        const privateKeyProvider = new EthereumPrivateKeyProvider({
+          config: { 
+            chainConfig: {
+              chainNamespace: CHAIN_NAMESPACES.EIP155,
+              chainId: '0x89', // Polygon mainnet (more reliable)
+              rpcTarget: 'https://polygon-rpc.com',
+              displayName: 'Polygon Mainnet',
+              blockExplorerUrl: 'https://polygonscan.com',
+              ticker: 'MATIC',
+              tickerName: 'Polygon',
+            }
+          },
+        });
+
+        const web3authInstance = new Web3Auth({
+          clientId,
+          web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
+          privateKeyProvider,
+        });
+
+        console.log("Web3Auth instance created, initializing modal...");
+        setWeb3auth(web3authInstance);
+        await web3authInstance.initModal();
+        console.log("Web3Auth modal initialized successfully");
+
+        if (web3authInstance.connected) {
+          console.log("User already connected, getting user info...");
+          setProvider(web3authInstance.provider);
+          setIsConnected(true);
+          const userData = await web3authInstance.getUserInfo();
+          setUser(userData);
+        }
+      } catch (error) {
+        console.error("Web3Auth initialization error:", error);
+        setInitError(error instanceof Error ? error.message : "Unknown error");
+        // Even if initialization fails, we should stop loading
+      } finally {
+        setIsLoading(false);
+        console.log("Web3Auth initialization complete");
+      }
+    };
+
+    init();
+
+    // Timeout fallback to prevent infinite loading
+    const timeout = setTimeout(() => {
+      console.warn("Web3Auth initialization timeout - forcing loading to false");
+      setIsLoading(false);
+    }, 10000); // 10 second timeout
+
+    return () => clearTimeout(timeout);
   }, []);
 
   const login = async () => {
+    if (!web3auth) {
+      console.error("Web3Auth not initialized");
+      return;
+    }
+
     try {
       setIsLoading(true);
-      
-      // Simulate Web3Auth login (replace with actual Web3Auth when packages are installed)
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      const mockUser = {
-        name: 'Demo User',
-        email: 'demo@web3auth.io',
-        profileImage: 'https://images.web3auth.io/web3auth-logo.svg',
-        address: '0x1234...5678'
-      };
-      
-      setUser(mockUser);
+      const web3authProvider = await web3auth.connect();
+      setProvider(web3authProvider);
       setIsConnected(true);
       
-      // Save to localStorage
-      localStorage.setItem('web3auth_connected', 'true');
-      localStorage.setItem('web3auth_user', JSON.stringify(mockUser));
+      const userData = await web3auth.getUserInfo();
+      setUser(userData);
       
     } catch (error) {
       console.error("Login error:", error);
@@ -55,13 +117,16 @@ export const Web3AuthProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   const logout = async () => {
+    if (!web3auth) {
+      console.error("Web3Auth not initialized");
+      return;
+    }
+
     try {
+      await web3auth.logout();
+      setProvider(null);
       setUser(null);
       setIsConnected(false);
-      
-      // Clear localStorage
-      localStorage.removeItem('web3auth_connected');
-      localStorage.removeItem('web3auth_user');
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -73,6 +138,8 @@ export const Web3AuthProvider = ({ children }: { children: React.ReactNode }) =>
         user,
         isLoading,
         isConnected,
+        provider,
+        initError,
         login,
         logout,
       }}
