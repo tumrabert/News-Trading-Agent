@@ -10,10 +10,9 @@ interface PortfolioOverviewProps {
 
 const PortfolioOverview = ({ detailed = false }: PortfolioOverviewProps) => {
   const holdings = [
-    { symbol: "BTC", name: "Bitcoin", amount: 1.25, value: 52500, change: 3.2, allocation: 45 },
-    { symbol: "ETH", name: "Ethereum", amount: 15.8, value: 38400, change: -1.5, allocation: 32 },
-    { symbol: "SOL", name: "Solana", amount: 125, value: 12500, change: 8.7, allocation: 15 },
-    { symbol: "MATIC", name: "Polygon", amount: 5000, value: 4200, change: 2.1, allocation: 8 }
+    { symbol: "BTC", name: "Bitcoin", amount: 1.25, value: 52500, change: 3.2, allocation: 60 },
+    { symbol: "ETH", name: "Ethereum", amount: 15.8, value: 38400, change: -1.5, allocation: 25 },
+    { symbol: "SOL", name: "Solana", amount: 125, value: 12500, change: 8.7, allocation: 15 }
   ];
 
   return (
@@ -26,8 +25,21 @@ const PortfolioOverview = ({ detailed = false }: PortfolioOverviewProps) => {
         {holdings.map((holding) => (
           <div key={holding.symbol} className="flex items-center justify-between p-3 rounded-lg border">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-xs font-bold">{holding.symbol}</span>
+              <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center">
+                <img 
+                  src={`/assets/logos/${holding.symbol}.png`}
+                  alt={holding.name}
+                  className="w-8 h-8 object-contain"
+                  onError={(e) => {
+                    // Fallback to text if image fails to load
+                    e.currentTarget.style.display = 'none';
+                    const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                    if (fallback) fallback.style.display = 'flex';
+                  }}
+                />
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center" style={{display: 'none'}}>
+                  <span className="text-xs font-bold">{holding.symbol}</span>
+                </div>
               </div>
               <div>
                 <p className="font-medium">{holding.name}</p>
@@ -56,7 +68,17 @@ const PortfolioOverview = ({ detailed = false }: PortfolioOverviewProps) => {
             {holdings.map((holding) => (
               <div key={holding.symbol} className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span>{holding.symbol}</span>
+                  <div className="flex items-center space-x-2">
+                    <img 
+                      src={`/assets/logos/${holding.symbol}.png`}
+                      alt={holding.name}
+                      className="w-4 h-4 object-contain"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                    <span>{holding.symbol}</span>
+                  </div>
                   <span>{holding.allocation}%</span>
                 </div>
                 <Progress value={holding.allocation} className="h-2" />
