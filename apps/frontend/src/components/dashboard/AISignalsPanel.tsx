@@ -3,14 +3,64 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { TrendingUp, TrendingDown, AlertTriangle, Zap, Brain, Target, Clock } from "lucide-react";
-import { useState } from "react";
-import { useAISignals } from "@/hooks/useAIAgents";
-import { formatDistanceToNow } from "date-fns";
+import { TrendingUp, TrendingDown, AlertTriangle, Brain, Clock, ExternalLink } from "lucide-react";
+import { useState, useEffect } from "react";
+import { format } from "date-fns";
+
+interface TradingSignal {
+  id: string;
+  agentId: string;
+  symbol: string;
+  signalType: 'buy' | 'sell' | 'hold';
+  confidence: number;
+  reason: string;
+  targetPrice?: number;
+  stopLoss?: number;
+  takeProfit?: number;
+  riskLevel: 'low' | 'medium' | 'high';
+  timeHorizon: string;
+  technicalIndicators: string[];
+  fundamentalFactors: string[];
+  marketConditions: Record<string, any>;
+  status: 'pending' | 'executed' | 'cancelled' | 'expired';
+  createdAt: string;
+  expiresAt?: string;
+}
 
 const AISignalsPanel = () => {
   const [selectedSignal, setSelectedSignal] = useState<string | null>(null);
-  const { signals, isLoading } = useAISignals();
+  const [signals, setSignals] = useState<TradingSignal[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  // Fetch signals directly using fetch API
+  const fetchSignals = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/signals');
+      const data = await response.json();
+      
+      if (data.success) {
+        setSignals(data.data);
+        setError(null);
+      } else {
+        setError(new Error('Failed to fetch signals'));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Unknown error'));
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fetch signals on component mount
+  useEffect(() => {
+    fetchSignals();
+    
+    // Refresh every 30 seconds
+    const interval = setInterval(fetchSignals, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Get recent signals (last 10)
   const recentSignals = signals.slice(0, 10);
@@ -63,86 +113,96 @@ const AISignalsPanel = () => {
         ) : (
           recentSignals.map((signal) => (
             <div key={signal.id} className="p-4 rounded-lg border bg-card hover:shadow-md transition-shadow">
+              {/* Header with DateTime */}
               <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+                  <Clock className="w-4 h-4" />
+                  <span>{format(new Date(signal.createdAt), 'MMM dd, yyyy HH:mm')}</span>
+                </div>
                 <div className="flex items-center space-x-2">
                   <Badge 
-                    variant={signal.signal_type === 'buy' ? 'default' : signal.signal_type === 'sell' ? 'destructive' : 'secondary'}
+                    variant={signal.signalType === 'buy' ? 'default' : signal.signalType === 'sell' ? 'destructive' : 'secondary'}
                     className="flex items-center space-x-1"
                   >
-                    {signal.signal_type === 'buy' && <TrendingUp className="w-3 h-3" />}
-                    {signal.signal_type === 'sell' && <TrendingDown className="w-3 h-3" />}
-                    {signal.signal_type === 'hold' && <AlertTriangle className="w-3 h-3" />}
-                    <span>{signal.signal_type.toUpperCase()} {signal.symbol}</span>
+                    {signal.signalType === 'buy' && <TrendingUp className="w-3 h-3" />}
+                    {signal.signalType === 'sell' && <TrendingDown className="w-3 h-3" />}
+                    {signal.signalType === 'hold' && <AlertTriangle className="w-3 h-3" />}
+                    <span>{signal.signalType.toUpperCase()}</span>
                   </Badge>
-                  <Badge variant="outline" className="flex items-center space-x-1">
-                    <Target className="w-3 h-3" />
-                    <span>{signal.confidence}%</span>
+                  <Badge variant="outline" className="font-semibold">
+                    {signal.symbol}
                   </Badge>
-                  <Badge variant={signal.risk_level === 'low' ? 'secondary' : signal.risk_level === 'medium' ? 'default' : 'destructive'}>
-                    {signal.risk_level} risk
-                  </Badge>
-                </div>
-                <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-                  <Clock className="w-3 h-3" />
-                  <span>{formatDistanceToNow(new Date(signal.created_at), { addSuffix: true })}</span>
                 </div>
               </div>
-
-              <div className="space-y-2 mb-3">
-                <p className="text-sm font-medium">{signal.reason}</p>
-                <div className="grid grid-cols-2 gap-2 text-xs">
-                  {signal.target_price && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Target:</span>
-                      <span className="font-medium">${Number(signal.target_price).toLocaleString()}</span>
-                    </div>
-                  )}
-                  {signal.stop_loss && (
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Stop Loss:</span>
-                      <span className="font-medium">${Number(signal.stop_loss).toLocaleString()}</span>
-                    </div>
-                  )}
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Time Horizon:</span>
-                    <span className="font-medium">{signal.time_horizon}</span>
+              
+              {/* News Title and Description */}
+              <div className="mb-3">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <h4 className="font-medium text-sm mb-1">
+                      {signal.reason || `${signal.signalType.toUpperCase()} Signal for ${signal.symbol}`}
+                    </h4>
+                    <p className="text-xs text-muted-foreground line-clamp-3">
+                      {signal.fundamentalFactors?.join(', ') || 'Market analysis indicates favorable conditions for this trading signal based on technical and fundamental indicators.'}
+                    </p>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Status:</span>
-                    <Badge variant="outline" className="text-xs">
-                      {signal.status}
-                    </Badge>
-                  </div>
+                  {signal.targetPrice && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="ml-2 h-6 w-6 p-0"
+                      onClick={() => window.open(`https://coinmarketcap.com/currencies/${signal.symbol.toLowerCase()}/`, '_blank')}
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                    </Button>
+                  )}
                 </div>
               </div>
 
-              <div className="space-y-2 mb-3">
-                <div className="text-xs font-medium">Confidence Score</div>
-                <Progress value={signal.confidence} className="h-2" />
+              {/* Signal Details */}
+              <div className="grid grid-cols-3 gap-4 text-xs">
+                <div className="space-y-1">
+                  <span className="text-muted-foreground">Confidence</span>
+                  <div className="flex items-center space-x-2">
+                    <Progress value={signal.confidence} className="h-2 flex-1" />
+                    <span className="font-medium">{signal.confidence}%</span>
+                  </div>
+                </div>
+                {signal.targetPrice && (
+                  <div className="space-y-1">
+                    <span className="text-muted-foreground">Target Price</span>
+                    <div className="font-medium">${Number(signal.targetPrice).toLocaleString()}</div>
+                  </div>
+                )}
+                <div className="space-y-1">
+                  <span className="text-muted-foreground">Status</span>
+                  <Badge variant="outline" className="text-xs">
+                    {signal.status}
+                  </Badge>
+                </div>
               </div>
 
+              {/* Additional Info Toggle */}
               {selectedSignal === signal.id && (
-                <div className="space-y-3 border-t pt-3">
-                  <div>
-                    <h5 className="text-xs font-medium mb-2">Technical Indicators</h5>
-                    <div className="flex flex-wrap gap-1">
-                      {signal.technical_indicators.map((indicator, idx) => (
-                        <Badge key={idx} variant="outline" className="text-xs">
-                          {indicator}
-                        </Badge>
-                      ))}
+                <div className="mt-3 pt-3 border-t space-y-2">
+                  {signal.technicalIndicators?.length > 0 && (
+                    <div>
+                      <h5 className="text-xs font-medium mb-1">Technical Indicators</h5>
+                      <div className="flex flex-wrap gap-1">
+                        {signal.technicalIndicators.map((indicator: string, idx: number) => (
+                          <Badge key={idx} variant="outline" className="text-xs">
+                            {indicator}
+                          </Badge>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                  <div>
-                    <h5 className="text-xs font-medium mb-2">Fundamental Factors</h5>
-                    <div className="flex flex-wrap gap-1">
-                      {signal.fundamental_factors.map((factor, idx) => (
-                        <Badge key={idx} variant="secondary" className="text-xs">
-                          {factor}
-                        </Badge>
-                      ))}
+                  )}
+                  {signal.stopLoss && (
+                    <div className="text-xs">
+                      <span className="text-muted-foreground">Stop Loss: </span>
+                      <span className="font-medium">${Number(signal.stopLoss).toLocaleString()}</span>
                     </div>
-                  </div>
+                  )}
                 </div>
               )}
 
@@ -150,12 +210,11 @@ const AISignalsPanel = () => {
                 <Button 
                   size="sm" 
                   variant="outline" 
-                  className="flex-1"
                   onClick={() => setSelectedSignal(selectedSignal === signal.id ? null : signal.id)}
                 >
-                  {selectedSignal === signal.id ? 'Hide Analysis' : 'View Analysis'}
+                  {selectedSignal === signal.id ? 'Hide Details' : 'View Details'}
                 </Button>
-                <Button size="sm" className="flex-1" disabled={signal.status !== 'pending'}>
+                <Button size="sm" variant="default" disabled={signal.status !== 'pending'}>
                   Execute Trade
                 </Button>
               </div>
@@ -166,17 +225,17 @@ const AISignalsPanel = () => {
         <div className="pt-4 border-t space-y-3">
           <div className="flex items-center justify-between">
             <div className="text-sm">
-              <p className="font-medium">🧠 AI Agent Status</p>
-              <p className="text-xs text-muted-foreground">Connected to Brain platform</p>
+              <p className="font-medium">🧠 CryptoSentinel Status</p>
+              <p className="text-xs text-muted-foreground">Real-time market monitoring</p>
             </div>
             <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
               <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
               Active
             </Badge>
           </div>
-          <Button variant="outline" size="sm" className="w-full">
-            Configure AI Agent Settings
-          </Button>
+          <div className="text-xs text-muted-foreground">
+            <p>Monitoring: CoinDesk, CoinTelegraph, Decrypt, The Block</p>
+          </div>
         </div>
       </CardContent>
     </Card>
