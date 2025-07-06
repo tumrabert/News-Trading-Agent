@@ -172,8 +172,11 @@ const PortfolioAnalytics = () => {
                 <p className="text-sm text-muted-foreground">Total P&L</p>
                 <TrendingUp className="w-4 h-4 text-green-600" />
               </div>
-              <p className="text-2xl font-bold text-green-600">
-                +${portfolioData.totalChange.toFixed(2)}
+              <p className="text-xl font-bold text-green-600 truncate">
+                +${portfolioData.totalChange.toLocaleString('en-US', { 
+                  minimumFractionDigits: 0, 
+                  maximumFractionDigits: 0 
+                })}
               </p>
               <p className="text-xs text-muted-foreground">
                 +{portfolioData.totalChangePercent.toFixed(2)}%
@@ -185,8 +188,11 @@ const PortfolioAnalytics = () => {
                 <p className="text-sm text-muted-foreground">Daily P&L</p>
                 <Activity className="w-4 h-4" />
               </div>
-              <p className="text-2xl font-bold">
-                +${portfolioData.dailyPnL.toFixed(2)}
+              <p className="text-xl font-bold truncate">
+                +${portfolioData.dailyPnL.toLocaleString('en-US', { 
+                  minimumFractionDigits: 0, 
+                  maximumFractionDigits: 0 
+                })}
               </p>
               <p className="text-xs text-muted-foreground">Today</p>
             </div>
