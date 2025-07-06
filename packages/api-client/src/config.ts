@@ -20,8 +20,8 @@ export interface ApiClientConfig {
  * Default API client configuration
  */
 export const defaultConfig: ApiClientConfig = {
-  baseUrl: 'http://localhost:3001/api',
-  wsUrl: 'ws://localhost:3001',
+  baseUrl: 'http://localhost:3003/api',
+  wsUrl: 'ws://localhost:3003',
   timeout: 10000,
   debug: false,
 };

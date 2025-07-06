@@ -199,6 +199,34 @@ class WebSocketClient {
   }
 
   /**
+   * Subscribe to agent room for receiving agent-specific events
+   * @param agentId Agent ID to subscribe to
+   */
+  subscribeToAgent(agentId: string): void {
+    if (this.socket?.connected) {
+      this.socket.emit('subscribe:agent', agentId);
+      const config = getApiConfig();
+      if (config.debug) {
+        console.log(`Subscribed to agent room: ${agentId}`);
+      }
+    }
+  }
+
+  /**
+   * Unsubscribe from agent room
+   * @param agentId Agent ID to unsubscribe from
+   */
+  unsubscribeFromAgent(agentId: string): void {
+    if (this.socket?.connected) {
+      this.socket.emit('unsubscribe:agent', agentId);
+      const config = getApiConfig();
+      if (config.debug) {
+        console.log(`Unsubscribed from agent room: ${agentId}`);
+      }
+    }
+  }
+
+  /**
    * Check if the WebSocket is connected
    * @returns True if connected, false otherwise
    */
