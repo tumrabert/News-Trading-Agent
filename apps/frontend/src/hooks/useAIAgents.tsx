@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { httpClient, wsClient, WebSocketEventType, configureApiClient } from '@workspace/api-client';
+import { useWeb3Auth } from '@/hooks/useWeb3Auth';
+import { httpClient, wsClient, WebSocketEventType, getApiConfig } from '@workspace/api-client';
 
 export interface AIAgent {
   id: string;
@@ -51,25 +52,33 @@ export interface TradeExecution {
   executed_at: string;
 }
 
-// Configure API client
-configureApiClient({
-  baseUrl: 'http://localhost:3003/api',
-  wsUrl: 'ws://localhost:3003',
-  debug: true
-});
+// API client is configured in App.tsx
 
 export const useAIAgents = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { isConnected: isWeb3AuthConnected } = useWeb3Auth();
   const [isConnected, setIsConnected] = useState(false);
 
-  // Connect to WebSocket on component mount
+  // Connect to WebSocket (temporarily disabled auth requirement for testing)
   useEffect(() => {
+    // Temporarily comment out auth requirement for testing
+    // if (!isWeb3AuthConnected) {
+    //   // Disconnect if user logs out
+    //   if (wsClient.isConnected()) {
+    //     wsClient.disconnect();
+    //     setIsConnected(false);
+    //   }
+    //   return;
+    // }
+
     const connectWebSocket = async () => {
       try {
         if (!wsClient.isConnected()) {
+          console.log('Connecting to AI Agent WebSocket...');
           await wsClient.connect();
           setIsConnected(true);
+          console.log('AI Agent WebSocket connected successfully');
           
           // Subscribe to agent status updates
           wsClient.subscribe(WebSocketEventType.AGENT_STATUS, (message) => {
@@ -85,7 +94,8 @@ export const useAIAgents = () => {
           });
         }
       } catch (error) {
-        console.error('Failed to connect to WebSocket:', error);
+        console.error('Failed to connect to AI Agent WebSocket:', error);
+        setIsConnected(false);
         toast({
           title: "Connection Error",
           description: "Failed to connect to AI Agent server",
@@ -100,27 +110,31 @@ export const useAIAgents = () => {
     return () => {
       if (wsClient.isConnected()) {
         wsClient.disconnect();
+        setIsConnected(false);
       }
     };
-  }, [queryClient, toast]);
+  }, [isWeb3AuthConnected, queryClient, toast]);
 
-  // Fetch agents from API
+  // Fetch agents from API only when authenticated
   const { data: agents, isLoading, error } = useQuery({
     queryKey: ['ai-agents'],
     queryFn: async () => {
       try {
+        console.log('Fetching AI agents...');
         const response = await httpClient.getAgents();
         
         if (!response.success) {
           throw new Error(response.error?.message || 'Failed to fetch agents');
         }
         
+        console.log('AI agents fetched successfully:', response.data);
         return response.data;
       } catch (err) {
         console.error('Error fetching agents:', err);
         throw err;
       }
     },
+    enabled: true, // Temporarily disable auth requirement for testing
   });
 
   // Create a new agent
@@ -196,31 +210,66 @@ export const useAIAgents = () => {
 
 export const useAISignals = (agentId?: string) => {
   const queryClient = useQueryClient();
+  const { isConnected: isWeb3AuthConnected } = useWeb3Auth();
 
   // Subscribe to signal updates via WebSocket
   useEffect(() => {
-    if (!wsClient.isConnected() || !agentId) return;
+    if (!wsClient.isConnected()) return; // Temporarily removed auth requirement
 
-    // Subscribe to signal updates for this agent
+    // Subscribe to signal updates
     wsClient.subscribe(WebSocketEventType.AGENT_SIGNAL, (message) => {
-      if (message.data.signal.agentId === agentId) {
-        queryClient.invalidateQueries({ queryKey: ['ai-signals', agentId] });
+      console.log('Received signal via WebSocket:', message);
+      
+      // If agentId is specified, only update for that agent
+      if (agentId && message.data.signal.agentId !== agentId) {
+        return;
       }
+      
+      // Invalidate queries to refetch signals
+      queryClient.invalidateQueries({ queryKey: ['ai-signals', agentId] });
     });
+
+    // For signals panel (no specific agentId), subscribe to the main agent
+    // Get the first available agent and subscribe to its room
+    if (!agentId && wsClient.isConnected()) {
+      // Subscribe to the default agent room (we'll get the agent ID from the API)
+      const subscribeToDefaultAgent = async () => {
+        try {
+          const response = await httpClient.getAgents();
+          if (response.success && response.data.length > 0) {
+            const defaultAgentId = response.data[0].id;
+            console.log('Subscribing to default agent:', defaultAgentId);
+            
+            // Subscribe to the agent room to receive real-time updates
+            wsClient.subscribeToAgent(defaultAgentId);
+          }
+        } catch (error) {
+          console.error('Error subscribing to default agent:', error);
+        }
+      };
+      
+      subscribeToDefaultAgent();
+    }
 
     return () => {
       // No need to unsubscribe as we're using a singleton WebSocket client
     };
-  }, [agentId, queryClient]);
+  }, [agentId, queryClient, isWeb3AuthConnected]);
 
   // Fetch signals from API
   const { data: signals, isLoading, error } = useQuery({
     queryKey: ['ai-signals', agentId],
     queryFn: async () => {
       try {
+        console.log('Fetching signals with agentId:', agentId);
+        console.log('API config:', httpClient);
+        console.log('Current API config from client:', JSON.stringify(getApiConfig()));
+        
         const response = agentId 
           ? await httpClient.getSignals({ agentId })
           : await httpClient.getSignals();
+        
+        console.log('Raw API response:', response);
         
         if (!response.success) {
           throw new Error(response.error?.message || 'Failed to fetch signals');
@@ -229,9 +278,10 @@ export const useAISignals = (agentId?: string) => {
         return response.data;
       } catch (err) {
         console.error('Error fetching signals:', err);
-        throw err;
+        throw new Error('Network Error');
       }
     },
+    enabled: true, // Temporarily disable auth requirement for testing
   });
 
   return {
@@ -243,10 +293,11 @@ export const useAISignals = (agentId?: string) => {
 
 export const useTradeExecutions = (agentId?: string) => {
   const queryClient = useQueryClient();
+  const { isConnected: isWeb3AuthConnected } = useWeb3Auth();
 
   // Subscribe to execution updates via WebSocket
   useEffect(() => {
-    if (!wsClient.isConnected() || !agentId) return;
+    if (!wsClient.isConnected() || !agentId) return; // Temporarily removed auth requirement
 
     // Subscribe to execution updates for this agent
     wsClient.subscribe(WebSocketEventType.AGENT_EXECUTION, (message) => {
@@ -258,7 +309,7 @@ export const useTradeExecutions = (agentId?: string) => {
     return () => {
       // No need to unsubscribe as we're using a singleton WebSocket client
     };
-  }, [agentId, queryClient]);
+  }, [agentId, queryClient, isWeb3AuthConnected]);
 
   // Fetch executions from API
   const { data: executions, isLoading, error } = useQuery({
@@ -279,6 +330,7 @@ export const useTradeExecutions = (agentId?: string) => {
         throw err;
       }
     },
+    enabled: true, // Temporarily disable auth requirement for testing
   });
 
   return {

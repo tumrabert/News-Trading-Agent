@@ -22,30 +22,41 @@ import type {
  * HTTP client for the AI Agent API
  */
 class HttpClient {
-  private client: AxiosInstance;
+  private client: AxiosInstance | null = null;
 
-  constructor() {
-    const config = getApiConfig();
-    this.client = axios.create({
-      baseURL: config.baseUrl,
-      timeout: config.timeout,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(config.apiKey ? { 'X-API-Key': config.apiKey } : {})
-      }
-    });
-
-    // Add response interceptor for error handling
-    this.client.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        const config = getApiConfig();
-        if (config.debug) {
-          console.error('API Error:', error.response?.data || error.message);
+  private getClient(): AxiosInstance {
+    if (!this.client) {
+      const config = getApiConfig();
+      console.log('Creating HTTP client with config:', config);
+      this.client = axios.create({
+        baseURL: config.baseUrl,
+        timeout: config.timeout,
+        headers: {
+          'Content-Type': 'application/json',
+          ...(config.apiKey ? { 'X-API-Key': config.apiKey } : {})
         }
-        return Promise.reject(error);
-      }
-    );
+      });
+
+      // Add response interceptor for error handling
+      this.client.interceptors.response.use(
+        (response) => response,
+        (error) => {
+          const config = getApiConfig();
+          if (config.debug) {
+            console.error('API Error:', error.response?.data || error.message);
+          }
+          return Promise.reject(error);
+        }
+      );
+    }
+    return this.client;
+  }
+
+  /**
+   * Reset the client to pick up new configuration
+   */
+  resetClient(): void {
+    this.client = null;
   }
 
   /**
@@ -55,7 +66,8 @@ class HttpClient {
    */
   private async request<T>(config: AxiosRequestConfig): Promise<ApiResponse<T>> {
     try {
-      const response: AxiosResponse<ApiResponse<T>> = await this.client(config);
+      const client = this.getClient();
+      const response: AxiosResponse<ApiResponse<T>> = await client(config);
       return response.data;
     } catch (error: any) {
       if (error.response?.data) {
@@ -293,4 +305,4 @@ class HttpClient {
 // Create singleton instance
 const httpClient = new HttpClient();
 
-export { httpClient };
+export { httpClient, HttpClient };
