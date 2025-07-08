@@ -36,7 +36,7 @@ async function main() {
         const defaultAgent = await agentManager.createAgent({
             name: "CryptoSentinel",
             config: {
-                riskLevel: defaultRiskConfig.level,
+                riskLevel: 'medium', // Map 'moderate' to 'medium'
                 maxPositionSize: defaultRiskConfig.maxPositionSize,
                 stopLossPercentage: defaultRiskConfig.stopLossPercentage,
                 takeProfitPercentage: 15, // Default take profit percentage

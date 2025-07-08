@@ -1,117 +1,124 @@
 name: Deploy to Production
 
-  on:
-    push:
-      branches: [ main ]
-    pull_request:
-      branches: [ main ]
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
-  jobs:
-    test-and-build:
-      runs-on: ubuntu-latest
-
-      steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-
-      - name: Install pnpm
-        run: npm install -g pnpm
-
-      - name: Install dependencies
-        run: pnpm install
-
-      - name: Run tests (if you have any)
-        run: |
-          # Add your test commands here
-          # pnpm test
-          echo "Tests passed"
-
-      - name: Build applications
-        run: |
-          pnpm run build
-          echo "Build completed successfully"
-
-      - name: Check build artifacts
-        run: |
-          ls -la apps/frontend/dist/
-          ls -la apps/ai-agent/dist/
-
-    deploy:
-      needs: test-and-build
-      runs-on: ubuntu-latest
-      if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
-      steps:
-      - name: Deploy to VPS
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
-          script: |
-            cd /var/www/news-trading-agent
-
-            # Create backup
-            timestamp=$(date +%Y%m%d_%H%M%S)
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'npm'
+        
+    - name: Install pnpm
+      run: npm install -g pnpm
+      
+    - name: Install dependencies
+      run: pnpm install
+      
+    - name: Run tests (if you have any)
+      run: |
+        # Add your test commands here when you have tests
+        # pnpm test
+        echo "Tests passed"
+        
+    - name: Build applications
+      run: |
+        pnpm run build
+        echo "Build completed successfully"
+        
+    - name: Check build artifacts
+      run: |
+        ls -la apps/frontend/dist/
+        ls -la apps/ai-agent/dist/
+        
+  deploy:
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    steps:
+    - name: Deploy to VPS
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        port: 22
+        script: |
+          cd /var/www/news-trading-agent
+          
+          # Create backup
+          timestamp=$(date +%Y%m%d_%H%M%S)
+          if [ -d "apps/frontend/dist" ]; then
             cp -r apps/frontend/dist apps/frontend/dist.backup.$timestamp
-
-            # Pull latest changes
-            git pull origin main
-
-            # Install dependencies
-            pnpm install
-
-            # Build applications
-            pnpm run build
-
-            # Check if build was successful
-            if [ ! -d "apps/frontend/dist" ] || [ ! -d "apps/ai-agent/dist" ]; then
-              echo "Build failed - restoring backup"
+          fi
+          
+          # Pull latest changes
+          git pull origin main
+          
+          # Install dependencies
+          pnpm install
+          
+          # Build applications
+          pnpm run build
+          
+          # Check if build was successful
+          if [ ! -d "apps/frontend/dist" ] || [ ! -d "apps/ai-agent/dist" ]; then
+            echo "Build failed - restoring backup"
+            if [ -d "apps/frontend/dist.backup.$timestamp" ]; then
               rm -rf apps/frontend/dist
               mv apps/frontend/dist.backup.$timestamp apps/frontend/dist
-              exit 1
             fi
-
-            # Restart services
-            pm2 restart all
-
-            # Test if services are running
-            sleep 5
-            if ! pm2 list | grep -q "online"; then
-              echo "Service restart failed - rolling back"
+            exit 1
+          fi
+          
+          # Restart services
+          pm2 restart all
+          
+          # Test if services are running
+          sleep 5
+          if ! pm2 list | grep -q "online"; then
+            echo "Service restart failed - rolling back"
+            if [ -d "apps/frontend/dist.backup.$timestamp" ]; then
               rm -rf apps/frontend/dist
               mv apps/frontend/dist.backup.$timestamp apps/frontend/dist
               pm2 restart all
-              exit 1
             fi
-
-            # Reload Nginx
-            systemctl reload nginx
-
-            # Test application health
-            if ! curl -f http://localhost:3003/health; then
-              echo "Health check failed - deployment may have issues"
-              exit 1
-            fi
-
-            # Clean up old backups (keep last 5)
-            ls -t apps/frontend/dist.backup.* | tail -n +6 | xargs -r rm -rf
-
-            echo "Deployment completed successfully!"
-
-      - name: Notify on failure
-        if: failure()
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            echo "Deployment failed - manual intervention required"
+            exit 1
+          fi
+          
+          # Reload Nginx
+          systemctl reload nginx
+          
+          # Test application health
+          if ! curl -f http://localhost:3003/health; then
+            echo "Health check failed - deployment may have issues"
+            exit 1
+          fi
+          
+          # Clean up old backups (keep last 5)
+          ls -t apps/frontend/dist.backup.* 2>/dev/null | tail -n +6 | xargs -r rm -rf
+          
+          echo "Deployment completed successfully!"
+          
+    - name: Notify on failure
+      if: failure()
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: ${{ secrets.VPS_USER }}
+        key: ${{ secrets.VPS_SSH_KEY }}
+        script: |
+          echo "Deployment failed - manual intervention required"
+          # You can add notification logic here (email, Slack, etc.)
