@@ -12,7 +12,7 @@ import UserMenu from "@/components/UserMenu";
 import { useWeb3Auth } from "@/hooks/useWeb3Auth";
 
 const Index = () => {
-  const { isConnected, isLoading } = useWeb3Auth();
+  const { isConnected, isLoading, initError } = useWeb3Auth();
 
   if (isLoading) {
     return (
@@ -25,6 +25,12 @@ const Index = () => {
         </div>
       </div>
     );
+  }
+
+  // Show error if Web3Auth failed to initialize, but continue with basic functionality
+  if (initError) {
+    console.warn("Web3Auth initialization failed:", initError);
+    // Continue to render the app even with Web3Auth error
   }
 
   return (
@@ -114,6 +120,14 @@ const Index = () => {
               <PortfolioAnalytics />
             </div>
           </>
+        )}
+        
+        {initError && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 mb-6">
+            <p className="text-red-800 dark:text-red-200 text-sm">
+              <strong>Web3Auth Warning:</strong> {initError}. Basic functionality is still available.
+            </p>
+          </div>
         )}
       </main>
     </div>

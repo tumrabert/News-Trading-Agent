@@ -13,18 +13,21 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const UserMenu = () => {
-  const { user, isConnected, login, logout, isLoading } = useWeb3Auth();
+  console.log("UserMenu component rendering...");
+  
+  const { user, isConnected, login, logout, isLoading, initError } = useWeb3Auth();
 
   // Show connect button when not connected
   if (!isConnected) {
     return (
       <Button 
         onClick={login} 
-        disabled={isLoading}
+        disabled={isLoading || !!initError}
         className="flex items-center gap-2"
+        variant={initError ? "destructive" : "default"}
       >
         <Wallet className="h-4 w-4" />
-        {isLoading ? 'Connecting...' : 'Connect Wallet'}
+        {isLoading ? 'Connecting...' : initError ? 'Wallet Unavailable' : 'Connect Wallet'}
       </Button>
     );
   }

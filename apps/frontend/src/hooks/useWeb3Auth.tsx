@@ -1,7 +1,7 @@
-import { createContext, useContext, useEffect, useState } from 'react';
-import { Web3Auth } from '@web3auth/modal';
-import { CHAIN_NAMESPACES, IProvider, WEB3AUTH_NETWORK } from '@web3auth/base';
-import { EthereumPrivateKeyProvider } from '@web3auth/ethereum-provider';
+import { createContext, useContext, useEffect, useState } from "react";
+import { Web3Auth } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, IProvider, WEB3AUTH_NETWORK } from "@web3auth/base";
+import { EthereumPrivateKeyProvider } from "@web3auth/ethereum-provider";
 
 interface Web3AuthContextType {
   user: any;
@@ -13,21 +13,28 @@ interface Web3AuthContextType {
   logout: () => Promise<void>;
 }
 
-const Web3AuthContext = createContext<Web3AuthContextType | undefined>(undefined);
+const Web3AuthContext = createContext<Web3AuthContextType | undefined>(
+  undefined
+);
 
-const clientId = 'BDlDFmqrcip10Uxk6l-xJkAoPfuVBjtqK2WUcckxQdTFKixnlmM2pIP1fQF76qzCvviQZ0lVAUkClidqBJ5u7zs';
+const clientId =
+  "BDlDFmqrcip10Uxk6l-xJkAoPfuVBjtqK2WUcckxQdTFKixnlmM2pIP1fQF76qzCvviQZ0lVAUkClidqBJ5u7zs";
 
 const chainConfig = {
   chainNamespace: CHAIN_NAMESPACES.EIP155,
-  chainId: '0x1', // Ethereum mainnet  
-  rpcTarget: 'https://cloudflare-eth.com',
-  displayName: 'Ethereum Mainnet',
-  blockExplorerUrl: 'https://etherscan.io',
-  ticker: 'ETH',
-  tickerName: 'Ethereum',
+  chainId: "0x1", // Ethereum mainnet
+  rpcTarget: "https://cloudflare-eth.com",
+  displayName: "Ethereum Mainnet",
+  blockExplorerUrl: "https://etherscan.io",
+  ticker: "ETH",
+  tickerName: "Ethereum",
 };
 
-export const Web3AuthProvider = ({ children }: { children: React.ReactNode }) => {
+export const Web3AuthProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [web3auth, setWeb3auth] = useState<Web3Auth | null>(null);
   const [provider, setProvider] = useState<IProvider | null>(null);
   const [user, setUser] = useState<any>(null);
@@ -39,19 +46,19 @@ export const Web3AuthProvider = ({ children }: { children: React.ReactNode }) =>
     const init = async () => {
       try {
         console.log("Starting Web3Auth initialization...");
-        
+
         // Create the private key provider with a working RPC endpoint
         const privateKeyProvider = new EthereumPrivateKeyProvider({
-          config: { 
+          config: {
             chainConfig: {
               chainNamespace: CHAIN_NAMESPACES.EIP155,
-              chainId: '0x89', // Polygon mainnet (more reliable)
-              rpcTarget: 'https://polygon-rpc.com',
-              displayName: 'Polygon Mainnet',
-              blockExplorerUrl: 'https://polygonscan.com',
-              ticker: 'MATIC',
-              tickerName: 'Polygon',
-            }
+              chainId: "0x89", // Polygon mainnet (more reliable)
+              rpcTarget: "https://polygon-rpc.com",
+              displayName: "Polygon Mainnet",
+              blockExplorerUrl: "https://polygonscan.com",
+              ticker: "MATIC",
+              tickerName: "Polygon",
+            },
           },
         });
 
@@ -63,7 +70,17 @@ export const Web3AuthProvider = ({ children }: { children: React.ReactNode }) =>
 
         console.log("Web3Auth instance created, initializing modal...");
         setWeb3auth(web3authInstance);
-        await web3authInstance.initModal();
+
+        // Set a reasonable timeout for initialization
+        const initPromise = web3authInstance.initModal();
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(
+            () => reject(new Error("Web3Auth initialization timeout")),
+            10000
+          );
+        });
+
+        await Promise.race([initPromise, timeoutPromise]);
         console.log("Web3Auth modal initialized successfully");
 
         if (web3authInstance.connected) {
@@ -75,7 +92,11 @@ export const Web3AuthProvider = ({ children }: { children: React.ReactNode }) =>
         }
       } catch (error) {
         console.error("Web3Auth initialization error:", error);
-        setInitError(error instanceof Error ? error.message : "Unknown error");
+        setInitError(
+          error instanceof Error
+            ? error.message
+            : "Web3Auth initialization failed"
+        );
         // Even if initialization fails, we should stop loading
       } finally {
         setIsLoading(false);
@@ -87,7 +108,9 @@ export const Web3AuthProvider = ({ children }: { children: React.ReactNode }) =>
 
     // Timeout fallback to prevent infinite loading
     const timeout = setTimeout(() => {
-      console.warn("Web3Auth initialization timeout - forcing loading to false");
+      console.warn(
+        "Web3Auth initialization timeout - forcing loading to false"
+      );
       setIsLoading(false);
     }, 10000); // 10 second timeout
 
@@ -105,10 +128,9 @@ export const Web3AuthProvider = ({ children }: { children: React.ReactNode }) =>
       const web3authProvider = await web3auth.connect();
       setProvider(web3authProvider);
       setIsConnected(true);
-      
+
       const userData = await web3auth.getUserInfo();
       setUser(userData);
-      
     } catch (error) {
       console.error("Login error:", error);
     } finally {
@@ -133,7 +155,7 @@ export const Web3AuthProvider = ({ children }: { children: React.ReactNode }) =>
   };
 
   return (
-    <Web3AuthContext.Provider 
+    <Web3AuthContext.Provider
       value={{
         user,
         isLoading,
@@ -152,7 +174,7 @@ export const Web3AuthProvider = ({ children }: { children: React.ReactNode }) =>
 export const useWeb3Auth = () => {
   const context = useContext(Web3AuthContext);
   if (context === undefined) {
-    throw new Error('useWeb3Auth must be used within a Web3AuthProvider');
+    throw new Error("useWeb3Auth must be used within a Web3AuthProvider");
   }
   return context;
 };
