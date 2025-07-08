@@ -30,7 +30,7 @@ COPY . .
 RUN pnpm run build
 
 # Verify the main file exists
-RUN test -f apps/ai-agent/dist/server/index.js || (echo "Main file not found!" && exit 1)
+RUN test -f apps/ai-agent/dist/index.js || (echo "Main file not found!" && exit 1)
 
 # Expose port
 EXPOSE 3003
@@ -40,4 +40,4 @@ ENV NODE_ENV=production
 ENV PORT=3003
 
 # Start the application
-CMD ["node", "apps/ai-agent/dist/server/index.js"]
+CMD ["node", "apps/ai-agent/dist/index.js"]
