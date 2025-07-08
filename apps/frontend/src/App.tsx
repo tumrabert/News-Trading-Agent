@@ -9,7 +9,7 @@ import Index from "./pages/Index";
 
 const queryClient = new QueryClient();
 
-// Configure API client at startup - use relative URLs to work with ngrok proxy
+// Configure API client at startup - use relative URLs to work with Vite proxy
 console.log('Configuring API client with baseUrl: /api');
 configureApiClient({
   baseUrl: '/api',  // Will be proxied to localhost:3003/api by vite
@@ -17,20 +17,22 @@ configureApiClient({
   debug: true
 });
 
-// Force a reset of the HTTP client to pick up new config
-import { httpClient } from '@workspace/api-client';
-(httpClient as any).resetClient?.();
+console.log('App component loaded');
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Web3AuthProvider>
-        <Toaster />
-        <Sonner />
-        <Index />
-      </Web3AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+const App = () => {
+  console.log('App component rendering...');
+  
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <Web3AuthProvider>
+          <Toaster />
+          <Sonner />
+          <Index />
+        </Web3AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
+  );
+};
 
 export default App;
