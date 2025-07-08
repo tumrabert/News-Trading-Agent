@@ -58,59 +58,65 @@ jobs:
         script: |
           cd /var/www/news-trading-agent
           
-          # Create backup
-          timestamp=$(date +%Y%m%d_%H%M%S)
-          if [ -d "apps/frontend/dist" ]; then
-            cp -r apps/frontend/dist apps/frontend/dist.backup.$timestamp
-          fi
+          echo "Starting Docker deployment..."
           
           # Pull latest changes
           git pull origin main
           
-          # Install dependencies
-          pnpm install
+          # Stop and remove existing container
+          docker stop news-trading-agent || true
+          docker rm news-trading-agent || true
           
-          # Build applications
-          pnpm run build
+          # Remove old image to save space
+          docker rmi news-trading-agent || true
           
-          # Check if build was successful
-          if [ ! -d "apps/frontend/dist" ] || [ ! -d "apps/ai-agent/dist" ]; then
-            echo "Build failed - restoring backup"
-            if [ -d "apps/frontend/dist.backup.$timestamp" ]; then
-              rm -rf apps/frontend/dist
-              mv apps/frontend/dist.backup.$timestamp apps/frontend/dist
-            fi
+          # Build new Docker image
+          echo "Building Docker image..."
+          docker build -t news-trading-agent .
+          
+          # Run new container
+          echo "Starting new container..."
+          docker run -d \
+            --name news-trading-agent \
+            -p 3003:3003 \
+            --restart unless-stopped \
+            -v /var/www/news-trading-agent/logs:/app/logs \
+            news-trading-agent
+          
+          # Wait for container to start
+          echo "Waiting for container to start..."
+          sleep 15
+          
+          # Check if container is running
+          if ! docker ps | grep -q "news-trading-agent"; then
+            echo "Container failed to start"
+            docker logs news-trading-agent
             exit 1
           fi
-          
-          # Restart services
-          pm2 restart all
-          
-          # Test if services are running
-          sleep 5
-          if ! pm2 list | grep -q "online"; then
-            echo "Service restart failed - rolling back"
-            if [ -d "apps/frontend/dist.backup.$timestamp" ]; then
-              rm -rf apps/frontend/dist
-              mv apps/frontend/dist.backup.$timestamp apps/frontend/dist
-              pm2 restart all
-            fi
-            exit 1
-          fi
-          
-          # Reload Nginx
-          systemctl reload nginx
           
           # Test application health
+          echo "Testing application health..."
           if ! curl -f http://localhost:3003/health; then
-            echo "Health check failed - deployment may have issues"
+            echo "Health check failed"
+            docker logs news-trading-agent
             exit 1
           fi
           
-          # Clean up old backups (keep last 5)
-          ls -t apps/frontend/dist.backup.* 2>/dev/null | tail -n +6 | xargs -r rm -rf
+          # Fix frontend file permissions for Nginx
+          sudo chown -R www-data:www-data /var/www/news-trading-agent/apps/frontend/dist/
+          sudo chmod -R 755 /var/www/news-trading-agent/apps/frontend/dist/
           
-          echo "Deployment completed successfully!"
+          # Reload Nginx to pick up any new static files
+          sudo systemctl reload nginx
+          
+          # Final test of both frontend and API
+          if ! curl -f http://bot.tumrabert.com/health; then
+            echo "Final health check failed"
+            exit 1
+          fi
+          
+          echo "Docker deployment completed successfully!"
+          echo "Application is live at: http://bot.tumrabert.com"
           
     - name: Notify on failure
       if: failure()
