@@ -228,8 +228,8 @@ const AgentCard = ({
             {activeSignals.slice(0, 3).map((signal) => (
               <div key={signal.id} className="flex items-center justify-between text-sm">
                 <div className="flex items-center space-x-2">
-                  <Badge variant={signal.signal_type === 'buy' ? 'default' : signal.signal_type === 'sell' ? 'destructive' : 'secondary'}>
-                    {signal.signal_type.toUpperCase()}
+                  <Badge variant={signal.signalType === 'buy' ? 'default' : signal.signalType === 'sell' ? 'destructive' : 'secondary'}>
+                    {signal.signalType?.toUpperCase() || 'N/A'}
                   </Badge>
                   <span>{signal.symbol}</span>
                 </div>
