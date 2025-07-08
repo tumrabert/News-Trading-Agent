@@ -138,7 +138,7 @@ class NewsMonitorService {
   }
 }
 
-export function createNewsMonitorPlugin(config: NewsMonitorConfig) {
+export function createNewsMonitorPlugin(config: NewsMonitorConfig): ReturnType<typeof createSimplePlugin> {
   const newsService = new NewsMonitorService();
   
   return createSimplePlugin({

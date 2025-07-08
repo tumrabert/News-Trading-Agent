@@ -191,7 +191,7 @@ class RiskManagerService {
   }
 }
 
-export function createRiskManagementPlugin(config: RiskManagerConfig) {
+export function createRiskManagementPlugin(config: RiskManagerConfig): ReturnType<typeof createSimplePlugin> {
   const riskManager = new RiskManagerService(config);
 
   return createSimplePlugin({
